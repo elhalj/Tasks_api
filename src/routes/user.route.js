@@ -33,6 +33,6 @@ export const authRoute = async (fastify) => {
       return reply.code(401).send({ error: "Invalid credentials" });
     }
     const token = generateToken(user._id);
-    return { message: "Login succesfully", token };
+    return { message: "Login succesfully", token, user };
   });
 };

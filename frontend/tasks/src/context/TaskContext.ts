@@ -4,7 +4,7 @@ export interface Task {
     _id?: string;
     title: string;
     description: string;
-    completed: boolean;
+    completed?: boolean;
     author?: {
         _id: string;
         userName: string;

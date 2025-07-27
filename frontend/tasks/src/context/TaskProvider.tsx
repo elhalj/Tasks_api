@@ -1,6 +1,7 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { TaskContext, type Task } from "./TaskContext";
 import instance from "../services/api";
+import toast from "react-hot-toast";
 
 interface TaskProviderProps {
   children: React.ReactNode;
@@ -75,8 +76,9 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
   // Delete a task
   const deleteTask = useCallback(async (id: string) => {
     try {
-      await instance.delete(`/delete/tasks/${id}`);
+      await instance.delete(`/delete/task/${id}`);
       setTasks(prevTasks => prevTasks.filter(task => task._id !== id));
+      toast.success("Supprimé avec asuccès")
       setError(null);
     } catch (error) {
       const errorMessage = "Failed to delete task";
@@ -86,10 +88,7 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
     }
   }, []);
 
-  // Load tasks on component mount
-  useEffect(() => {
-    getTasks();
-  }, [getTasks]);
+
 
   // Context value
   const contextValue = {
@@ -102,9 +101,9 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
   };
 
   // Render loading state if needed
-  if (loading) {
-    return <div>Loading tasks...</div>;
-  }
+  // if (loading) {
+  //   return <div>Loading tasks...</div>;
+  // }
 
   // Render error message if there's an error
   if (error) {
