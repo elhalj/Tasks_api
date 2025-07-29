@@ -14,7 +14,7 @@ export interface Task {
 
 export interface TaskProps {
     tasks: Task[];
-    addTask: (title: string, description: string, completed: boolean) => Promise<void>;
+    addTask: (title: string, description: string, completed?: boolean) => Promise<void>;
     getTasks: () => Promise<void>;
     getTaskById: (id: string) => Promise<Task | null>;
     updateTask: (id: string, task: Task) => Promise<void>;

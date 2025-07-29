@@ -1,105 +1,255 @@
+import { emitTaskNotification } from "../helpers/tasksNotification.js";
 import Task from "../models/tasks.model.js";
 
 export const taskRoutes = async (fastify, options) => {
-  //Get all Tasks for the authenticated user
-  fastify.get("/get/tasks", { preHandler: fastify.authenticate }, async (request) => {
-    return await Task.find({ author: request.user.userId });
-  });
+  /**
+   * Get all Tasks for the authenticated user
+   */
+  fastify.get(
+    "/get/tasks",
+    { preHandler: fastify.authenticate },
+    async (request) => {
+      const tasks = await Task.find({ author: request.user.userId })
+        .populate("author", "userName email")
+        .sort({ createdAt: -1 });
 
-  //Add Tasks
-  fastify.post("/add/tasks", { preHandler: fastify.authenticate }, async (request, reply) => {
-    try {
-      // Créer la tâche avec l'auteur
-      const task = new Task({
-        ...request.body,
-        author: request.user.userId // L'ID de l'utilisateur est ajouté depuis le token JWT
-      });
-      
-      // Sauvegarder la tâche
-      const savedTask = await task.save();
-      
-      // Trouver l'utilisateur et ajouter la tâche à son tableau myTasks
-      const User = (await import('../models/user.model.js')).default;
-      await User.findByIdAndUpdate(
-        request.user.userId,
-        { $push: { myTasks: savedTask._id } },
-        { new: true, useFindAndModify: false }
-      );
-      
-      return savedTask;
-    } catch (error) {
-      reply.code(500).send({ error: 'Erreur lors de la création de la tâche' });
+      return {
+        success: true,
+        count: tasks.length,
+        tasks,
+      };
     }
-  });
+  );
 
-  // Update Task by Id
-  fastify.put("/update/tasks/:id", { preHandler: fastify.authenticate }, async (request, reply) => {
-    try {
-      const { id } = request.params;
-      const userId = request.user.userId;
-      
-      // Vérifier que la tâche existe et appartient à l'utilisateur
-      const task = await Task.findOne({ _id: id, author: userId });
-      if (!task) {
-        return reply.code(404).send({ error: 'Tâche non trouvée ou accès non autorisé' });
+  /**
+   * Add Tasks
+   */
+  fastify.post(
+    "/add/tasks",
+    { preHandler: fastify.authenticate },
+    async (request, reply) => {
+      try {
+        //Validation des données
+        const { title, description } = request.body;
+        if (!title || title.trim() === "") {
+          return reply.code(400).send({
+            success: false,
+            error: "Le titre de la tache est obligatoire",
+          });
+        }
+
+        // Créer la tâche avec l'auteur
+        const task = new Task({
+          ...request.body,
+          author: request.user.userId, // L'ID de l'utilisateur est ajouté depuis le token JWT
+        });
+
+        // Sauvegarder la tâche
+        const savedTask = await task.save();
+
+        // Trouver l'utilisateur et ajouter la tâche à son tableau myTasks
+        const User = (await import("../models/user.model.js")).default;
+        await User.findByIdAndUpdate(
+          request.user.userId,
+          { $push: { myTasks: savedTask._id } },
+          { new: true, useFindAndModify: false }
+        );
+
+        //Notification en temps réel
+        emitTaskNotification("taskCreated", {
+          task: savedTask,
+          message: `Nouvelle tache créée ${savedTask.title}`,
+          type: "success",
+          authorId: request.user.userId,
+        });
+
+        //Notification personnelle à l'utilisateur
+        emitTaskNotification(
+          "personalTaskCreated",
+          {
+            task: savedTask,
+            message: "Votre tache a été créée avec succès",
+            type: "info",
+          },
+          request.user.userId
+        );
+
+        return savedTask;
+      } catch (error) {
+        reply
+          .code(500)
+          .send({ error: "Erreur lors de la création de la tâche" });
       }
-      
-      // Mettre à jour la tâche
-      const updatedTask = await Task.findByIdAndUpdate(
-        id,
-        { ...request.body, author: userId }, // S'assurer que l'auteur ne peut pas être modifié
-        { new: true }
-      );
-      
-      return updatedTask;
-    } catch (error) {
-      reply.code(500).send({ error: 'Erreur lors de la mise à jour de la tâche' });
     }
-  });
+  );
 
-  // Get Task by Id
-  fastify.get("/get/task/:id", { preHandler: fastify.authenticate }, async (request, reply) => {
-    try {
-      const { id } = request.params;
-      const task = await Task.findOne({ _id: id, author: request.user.userId });
-      
-      if (!task) {
-        return reply.code(404).send({ error: 'Tâche non trouvée ou accès non autorisé' });
-      }
-      
-      return task;
-    } catch (error) {
-      reply.code(500).send({ error: 'Erreur lors de la récupération de la tâche' });
-    }
-  });
+  /**
+   * Update Task by Id
+   */
+  fastify.put(
+    "/update/tasks/:id",
+    { preHandler: fastify.authenticate },
+    async (request, reply) => {
+      try {
+        const { id } = request.params;
+        const userId = request.user.userId;
 
-  // Delete Task by Id
-  fastify.delete("/delete/task/:id", { preHandler: fastify.authenticate }, async (request, reply) => {
-    try {
-      const { id } = request.params;
-      const userId = request.user.userId;
-      
-      // Vérifier que la tâche existe et appartient à l'utilisateur
-      const task = await Task.findOne({ _id: id, author: userId });
-      if (!task) {
-        return reply.code(404).send({ error: 'Tâche non trouvée ou accès non autorisé' });
+        // Vérifier que la tâche existe et appartient à l'utilisateur
+        const existingTask = await Task.findOne({ _id: id, author: userId });
+        if (!existingTask) {
+          return reply
+            .code(404)
+            .send({ error: "Tâche non trouvée ou accès non autorisé" });
+        }
+
+        // Mettre à jour la tâche
+        const updatedTask = await Task.findByIdAndUpdate(
+          id,
+          { ...request.body, author: userId }, // S'assurer que l'auteur ne peut pas être modifié
+          { new: true }
+        );
+
+        //Détecter les changements siginficative
+        const statusChange = existingTask.status !== updatedTask.status;
+        const priorityChange = existingTask.priority !== updatedTask.priority;
+
+        //Notification en temps réel avec context
+        let notificationMessage = `Tache "${updatedTask.title}" mise à jour`;
+
+        if (statusChange) {
+          notificationMessage = `Tache "${updatedTask.title}" - Status: ${updatedTask.status}`;
+        } else if (priorityChange) {
+          notificationMessage = `Tache "${updatedTask.title}" - Priority: ${updatedTask.priority}`;
+        }
+
+        // Notification en temps réel avec context
+        // - previousTask pour stocker l'ancienne version de la tâche
+        // - change pour stocker les changements (status, priority)
+        emitTaskNotification("taskUpdated", {
+          task: updatedTask,
+          previousTask: existingTask,
+          message: notificationMessage,
+          type: statusChange ? "warning" : "info",
+          change: {
+            status: statusChange,
+            priority: priorityChange,
+          },
+        });
+
+        //Notification spécifique à la tache (si d'autre utilisateur collabore)
+        fastify.io.to(`task_${id}`).emit("taskRoomUpdate", {
+          taskId: id,
+          task: updatedTask,
+          updatedBy: userId,
+          timestamp: new Date(),
+        });
+
+        return updatedTask;
+      } catch (error) {
+        reply
+          .code(500)
+          .send({ error: "Erreur lors de la mise à jour de la tâche" });
       }
-      
-      // Supprimer la tâche
-      await Task.findByIdAndDelete(id);
-      
-      // Supprimer la référence de la tâche dans le tableau myTasks de l'utilisateur
-      const User = (await import('../models/user.model.js')).default;
-      await User.findByIdAndUpdate(
-        userId,
-        { $pull: { myTasks: id } },
-        { new: true }
-      );
-      
-      return { message: 'Tâche supprimée avec succès' };
-    } catch (error) {
-      reply.code(500).send({ error: 'Erreur lors de la suppression de la tâche' });
     }
-    return { message: "Task deleted !" };
-  });
+  );
+
+  /**
+   * Get Task by Id
+   */
+  fastify.get(
+    "/get/task/:id",
+    { preHandler: fastify.authenticate },
+    async (request, reply) => {
+      try {
+        const { id } = request.params;
+        const task = await Task.findOne({
+          _id: id,
+          author: request.user.userId,
+        });
+
+        if (!task) {
+          return reply
+            .code(404)
+            .send({ error: "Tâche non trouvée ou accès non autorisé" });
+        }
+
+        // Envoie une notification en temps réel pour signaler que la tâche a été vue
+        // par l'utilisateur connecté
+        emitTaskNotification(
+          "taskViewed",
+          {
+            taskId: id,
+            viewedBy: request.user.userId,
+            taskTitle: task.title,
+          },
+          request.user.userId
+        );
+
+        return task;
+      } catch (error) {
+        reply
+          .code(500)
+          .send({ error: "Erreur lors de la récupération de la tâche" });
+      }
+    }
+  );
+
+  /**
+   * Delete Task by Id
+   */
+  fastify.delete(
+    "/delete/task/:id",
+    { preHandler: fastify.authenticate },
+    async (request, reply) => {
+      try {
+        const { id } = request.params;
+        const userId = request.user.userId;
+
+        // Vérifier que la tâche existe et appartient à l'utilisateur
+        const task = await Task.findOne({ _id: id, author: userId });
+        if (!task) {
+          return reply
+            .code(404)
+            .send({ error: "Tâche non trouvée ou accès non autorisé" });
+        }
+
+        // Supprimer la tâche
+        await Task.findByIdAndDelete(id);
+
+        // Supprimer la référence de la tâche dans le tableau myTasks de l'utilisateur
+        const User = (await import("../models/user.model.js")).default;
+        await User.findByIdAndUpdate(
+          userId,
+          { $pull: { myTasks: id } },
+          { new: true }
+        );
+
+        // Emettre une notification de suppression de tâche
+        emitTaskNotification("taskDeleted", {
+          taskId: id,
+          taskTitle: task.title,
+          message: `tache ${task.title} supprimé`,
+          deletedBy: userId,
+        });
+
+        // Informer les utilisateurs de la tâche qu'elle a été supprimée
+        fastify.io.to(`task_${id}`).emit("taskRoomDeleted", {
+          taskId: id,
+          message: "Cette tache a été suprimé",
+          timestamp: new Date(),
+        });
+
+        return {
+          success: true,
+          message: "Tâche supprimée avec succès",
+          DaletedTaskId: id,
+        };
+      } catch (error) {
+        reply
+          .code(500)
+          .send({ error: "Erreur lors de la suppression de la tâche" });
+      }
+      return { message: "Task deleted !" };
+    }
+  );
 };
