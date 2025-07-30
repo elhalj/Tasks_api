@@ -104,7 +104,7 @@ async function startServer() {
         if (socket.userId) {
           socket.broadcast.emit("userStatusChanged", {
             userId: socket.userId,
-            us: "offline",
+            status: "offline",
           });
         }
       });

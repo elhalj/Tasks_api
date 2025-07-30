@@ -1,7 +1,22 @@
-import { emitTaskNotification } from "../helpers/tasksNotification.js";
 import Task from "../models/tasks.model.js";
+import { v4 as uuidv4 } from "uuid";
 
 export const taskRoutes = async (fastify, options) => {
+  const emitTaskNotification = (events, data, userId = null) => {
+    const notification = {
+      ...data,
+      timestamp: new Date(),
+      id: uuidv4(),
+    };
+
+    if (userId) {
+      // Si un utilisateur est ciblé, on envoie la notification à son socket
+      fastify.io.to(`user_${userId}`).emit(events, notification);
+    } else {
+      // Sinon, on envoie la notification à tous les utilisateurs connectés
+      fastify.io.emit(events, notification);
+    }
+  };
   /**
    * Get all Tasks for the authenticated user
    */
@@ -242,7 +257,7 @@ export const taskRoutes = async (fastify, options) => {
         return {
           success: true,
           message: "Tâche supprimée avec succès",
-          DaletedTaskId: id,
+          DeletedTaskId: id,
         };
       } catch (error) {
         reply

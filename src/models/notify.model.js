@@ -6,7 +6,7 @@ const notifySchema = new mongoose.Schema(
     events: String,
     data: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Task,
+      ref: "Task",
     },
   },
   { timestamps: true }

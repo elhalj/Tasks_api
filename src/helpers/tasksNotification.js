@@ -1,4 +1,5 @@
 import fastify from "fastify";
+import { v4 as uuidv4 } from "uuid";
 // Helper task fonction pour émettre des notifications
 // events = nom de l'événement émit (par exemple 'task-created')
 // data = données à envoyer avec l'événement (par exemple { title: 'foo', description: 'bar' })
@@ -7,7 +8,7 @@ export const emitTaskNotification = (events, data, userId = null) => {
   const notification = {
     ...data,
     timestamp: new Date(),
-    id: Math.random().toString(36).substring(2, 9),
+    id: uuidv4(),
   };
 
   if (userId) {
