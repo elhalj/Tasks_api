@@ -184,7 +184,6 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
     //Netoyage
     return () => {
       socketServices.removeAllListeners();
-      socketServices.disconnect();
     }
   }, [user?._id]); // Use optional chaining in case user is null
 
