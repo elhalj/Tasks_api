@@ -1,3 +1,4 @@
+import fastify from "fastify";
 // Helper task fonction pour émettre des notifications
 // events = nom de l'événement émit (par exemple 'task-created')
 // data = données à envoyer avec l'événement (par exemple { title: 'foo', description: 'bar' })
