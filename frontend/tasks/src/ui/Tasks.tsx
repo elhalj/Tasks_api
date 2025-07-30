@@ -11,8 +11,6 @@ const Tasks = () => {
         getTasks();
     }, [getTasks]);
 
-    
-
     if (user && tasks.length === 0) {
         return <div className="text-center text-lg">Vous n'avez pas de taches</div>
     }

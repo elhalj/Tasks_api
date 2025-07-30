@@ -35,7 +35,7 @@ const CreateTask = () => {
     setLoading(true);
     try {
       await addTask(myTask.title, myTask.description, myTask.completed);
-      toast.success("Ajouté avec succès");
+      // toast.success("Ajouté avec succès");
       setMyTask({ title: "", description: "", completed: false });
     } catch (error) {
       console.error(error);

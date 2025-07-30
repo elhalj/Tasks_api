@@ -5,6 +5,8 @@ export interface Task {
     title: string;
     description: string;
     completed?: boolean;
+    status?: 'pending' | 'in_progress' | 'done' | 'canceled';
+    priority?: 'low' | 'medium' | 'high' | 'critical';
     author?: {
         _id: string;
         userName: string;
@@ -14,18 +16,30 @@ export interface Task {
 
 export interface TaskProps {
     tasks: Task[];
-    addTask: (title: string, description: string, completed: boolean) => Promise<void>;
+    loading: boolean;
+    error: string | null;
+    onlineUsers: Set<string>;
+    stats: any;
+    addTask: (title: string, description: string, completed?: boolean) => Promise<void>;
     getTasks: () => Promise<void>;
     getTaskById: (id: string) => Promise<Task | null>;
     updateTask: (id: string, task: Task) => Promise<void>;
     deleteTask: (id: string) => Promise<void>;
+    viewTaskDetails: (taskId: string) => void;
+    leaveTaskDetails : (taskId: string) => void;
 }
 
 export const TaskContext = createContext<TaskProps>({
     tasks: [],
-    addTask: async () => { },
-    getTasks: async () => { },
+    loading: true,
+    error: null,
+    onlineUsers: new Set(),
+    stats: {},
+    addTask: async () => {},
+    getTasks: async () => {},
     getTaskById: async () => null,
-    updateTask: async () => { },
-    deleteTask: async () => { }
+    updateTask: async () => {},
+    deleteTask: async () => {},
+    viewTaskDetails: () => {},
+    leaveTaskDetails: () => {}
 });

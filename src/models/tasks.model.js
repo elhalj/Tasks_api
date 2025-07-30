@@ -8,6 +8,16 @@ const taskSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    status: {
+      type: String,
+      enum: ["pending", "in_progress", "done", "canceled"],
+      default: "pending",
+    },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high", "critical"],
+      default: "low",
+    },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
