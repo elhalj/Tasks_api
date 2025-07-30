@@ -8,23 +8,35 @@ export interface SocketEvents {
     connected: (data: { message: string }) => void;
 }
 
+export interface Notification<T = Record<string, any>> {
+    message: string;
+    data: T;
+    [key: string]: any;
+}
+
 export interface SocketTaskEvents {
-    taskCreated: (task: Task) => void;
-    taskUpdated: (task: Task) => void;
-    taskDeleted: (taskId: string) => void;
-    personalTaskCreated: (task: Task) => void;
+    taskCreated: (notification: Notification<{ task: Task, message: string, type:string, authorId?: string }>) => void;
+    taskUpdated: (notification: Notification<{ task: Task, previousTask: Task, message: string, change: {status: boolean, priority: boolean} }>) => void;
+    taskDeleted: (notification: Notification<{ taskId: string, taskTitle: string, deletedBy: string }>) => void;
+    taskViewed: (notification: Notification<{ taskId: string, viewedBy: string, taskTitle: string }>) => void;
+    personalTaskCreated: (notification: Notification<{task: Task, message: string, type: string}>) => void;
+}
+
+export interface Stat {
+    users: User[];
+    tasks: Task[];
 }
 
 export interface SocketStatEvents {
-    statUpdated: (stat: Stat) => void;
+    statUpdated: (notification: Notification<{ userId: string, stats: any }>) => void;
 }
 
 export interface SocketUserStatusEvents {
-    userStatusChanged: (user: User) => void;
+    userStatusChanged: (data: { userId: string, status: 'online' | 'offline' }) => void;
 }
 
 export interface SocketTaskRoomEvents {
-    taskRoomUpdate: (taskId: string, users: User[]) => void;
+    taskRoomUpdate: (data: { taskId: string, task: Task, updatedBy: string, timestamp: Date }) => void;
     taskRoomDeleted: (taskId: string) => void;
 }
 
@@ -40,6 +52,7 @@ export interface SocketServiceInterface {
     onTaskCreated: (callback: SocketTaskEvents['taskCreated']) => void;
     onTaskUpdated: (callback: SocketTaskEvents['taskUpdated']) => void;
     onTaskDeleted: (callback: SocketTaskEvents['taskDeleted']) => void;
+    onTaskViewed: (callback: SocketTaskEvents['taskViewed']) => void;
     onPersonalTaskCreated: (callback: SocketTaskEvents['personalTaskCreated']) => void;
     onStatUpdate: (callback: SocketStatEvents['statUpdated']) => void;
     onUserStatusChanged: (callback: SocketUserStatusEvents['userStatusChanged']) => void;
@@ -65,7 +78,8 @@ class SocketService implements SocketServiceInterface {
 
         this.socket = io('http://localhost:3000', {
             auth: {
-                token: token
+                token: token,
+                userId: userId
             },
             transports: ['websocket', 'polling']
         });
@@ -116,7 +130,13 @@ class SocketService implements SocketServiceInterface {
     }
 
     onTaskDeleted(callback: SocketTaskEvents['taskDeleted']) {
-        this.socket?.on("taskDeleted", callback)
+        if (!this.socket) return;
+        this.socket.on("taskDeleted", callback);
+    }
+
+    onTaskViewed(callback: SocketTaskEvents['taskViewed']) {
+        if (!this.socket) return;
+        this.socket.on("taskViewed", callback);
     }
 
     onPersonalTaskCreated(callback: SocketTaskEvents['personalTaskCreated']) {
