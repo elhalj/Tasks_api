@@ -9,6 +9,8 @@ interface TaskProps {
   title: string;
   description: string;
   completed?: boolean;
+  status?: string;
+  priority?: string;
 }
 
 // Composant pour mettre à jour une tâche
@@ -22,6 +24,8 @@ const UpdateTask = () => {
     title: myTask?.title || "",
     description: myTask?.description || "",
     completed: myTask?.completed || false,
+    status: myTask?.status || "pending",
+    priority: myTask?.priority || "low"
   });
 
   // On met à jour l'état de la tâche si elle change dans la liste des tâches
@@ -33,11 +37,18 @@ const UpdateTask = () => {
 
   // Fonction pour gérer les changements de valeur des champs
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
     const newValue =
-      type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
+      type === "checkbox"
+        ? (e.target as HTMLInputElement).checked
+        : type === "select-one"
+        ? (e.target as HTMLSelectElement).value
+        : value;
 
     setTask((prevTask) => ({
       ...prevTask,
@@ -54,7 +65,6 @@ const UpdateTask = () => {
     }
     try {
       await updateTask(id, task);
-      toast.success("Modifier avec succès");
     } catch (error) {
       console.error(error);
     }
@@ -63,12 +73,18 @@ const UpdateTask = () => {
   return (
     <>
       <p>
-        <Link to="/dashboard" className="text-blue-500 hover:underline bg-blue-200 p-1 rounded-md">
+        <Link
+          to="/dashboard"
+          className="text-blue-500 hover:underline bg-blue-200 p-1 rounded-md"
+        >
           Retourner au dashboard
         </Link>
       </p>
       {/* Formulaire pour mettre à jour la tâche */}
-      <form onSubmit={handleSubmit} className="bg-gray-100 p-4 rounded-md flex flex-col gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-gray-100 p-4 rounded-md flex flex-col gap-4"
+      >
         {/* Champ pour le titre */}
         <label className="flex flex-col">
           Titre:
@@ -100,6 +116,36 @@ const UpdateTask = () => {
             onChange={handleChange}
             className="ml-2"
           />
+        </label>
+        {/* Select pour le statut */}
+        <label className="flex flex-col">
+          Statut:
+          <select
+            name="status"
+            value={task.status}
+            onChange={handleChange}
+            className="border border-gray-300 rounded p-2"
+          >
+            <option value="pending">pending</option>
+            <option value="in_progress">in_progress</option>
+            <option value="done">done</option>
+            <option value="canceled">canceled</option>
+          </select>
+        </label>
+        {/* Select pour la priorité */}
+        <label className="flex flex-col">
+          Priorité:
+          <select
+            name="priority"
+            value={task.priority}
+            onChange={handleChange}
+            className="border border-gray-300 rounded p-2"
+          >
+            <option value="low">low</option>
+            <option value="medium">medium</option>
+            <option value="high">high</option>
+            <option value="critical">critical</option>
+          </select>
         </label>
         {/* Bouton pour soumettre le formulaire */}
         <button

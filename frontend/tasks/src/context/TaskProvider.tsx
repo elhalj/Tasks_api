@@ -2,8 +2,12 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { TaskContext, type Task } from "./TaskContext";
 import { AuthContext } from "./AuthContext";
 import instance from "../services/api";
-import toast from "react-hot-toast";
-import socketServices from "../services/socketServices";
+import toast, { CheckmarkIcon } from "react-hot-toast";
+import socketServices, { 
+  type SocketTaskEvents,
+  type SocketStatEvents,
+  type SocketUserStatusEvents
+} from "../services/socketServices";
 
 interface TaskProviderProps {
   children: React.ReactNode;
@@ -33,9 +37,9 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
   }, []);
 
   // Add a new task
-  const addTask = useCallback(async (title: string, description: string, completed: boolean = false) => {
+  const addTask = useCallback(async (title: string, description: string, completed: boolean = false, status: string = "pending", priority: string = "low") => {
     try {
-      const res = await instance.post("/add/tasks", { title, description, completed });
+      const res = await instance.post("/add/tasks", { title, description, completed, status, priority });
       setTasks(prevTasks => [...prevTasks, res.data]);
       setError(null);
       return res.data;
@@ -55,11 +59,13 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
         prevTasks.map(t => (t._id === id ? res.data : t))
       );
       setError(null);
+      toast.success("Tâche mise à jour avec succès");
       return res.data;
-    } catch (error) {
-      const errorMessage = "Failed to update task";
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || "Échec de la mise à jour de la tâche";
       setError(errorMessage);
-      console.error(errorMessage, error);
+      toast.error(errorMessage);
+      console.error("Update task error:", error);
       throw error;
     }
   }, []);
@@ -67,7 +73,7 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
   // Get a single task by ID
   const getTaskById = useCallback(async (id: string): Promise<Task | null> => {
     try {
-      const res = await instance.get(`/get/tasks/${id}`);
+      const res = await instance.get(`/get/task/${id}`);
       return res.data;
     } catch (error) {
       const errorMessage = `Failed to fetch task with id ${id}`;
@@ -82,12 +88,13 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
     try {
       await instance.delete(`/delete/task/${id}`);
       setTasks(prevTasks => prevTasks.filter(task => task._id !== id));
-      // toast.success("Supprimé avec asuccès")
       setError(null);
-    } catch (error) {
-      const errorMessage = "Failed to delete task";
+      toast.success("Tâche supprimée avec succès");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || "Échec de la suppression de la tâche";
       setError(errorMessage);
-      console.error(errorMessage, error);
+      toast.error(errorMessage);
+      console.error("Delete task error:", error);
       throw error;
     }
   }, []);
@@ -111,81 +118,143 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
   useEffect(() => {
     //Connection Socket.ID
     const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("user");
+    const saveUser = localStorage.getItem("user");
 
-    if (token && userId) {
-      socketServices.connect(token, userId);
+    if (token && saveUser && user) {
+      try {
+        const userData = JSON.parse(saveUser);
+        socketServices.connect(token , userData._id || user._id)
+      } catch (error) {
+        console.error("Erreur pour parser les données user", error);
+        return;
+      }
     }
 
-    //Ecouteur d'évenement
-    socketServices.onTaskCreated((notification) => {
-      console.log("nouvelle tache", notification);
+    // Gestionnaire pour la création d'une tâche
+    const handleCreateTask: SocketTaskEvents['taskCreated'] = (data) => {
+      try {
+        console.log("Nouvelle tâche reçue", data);
 
-      // Ne pas ajouter la tâche si l'auteur est l'utilisateur actuel, car elle est déjà ajoutée via la réponse de l'API
-      if (notification.authorId !== userId) {
-        setTasks(prev => [notification.task, ...prev])
-      }
-
-      //Afficher les notifications
-      toast(notification.message, {
-        icon: "🆕"
-      })
-    })
-
-    socketServices.onTaskUpdated((notification) => {
-      console.log("Tache mise à jour", notification);
-
-      setTasks(prev => prev.map(task => task._id === notification.task._id ? notification.task : task));
-
-      // Afficher la notification de mise à jour
-      toast(notification.message, {
-        icon: '📝',
-      });
-    })
-
-    socketServices.onTaskDeleted((notification) => {
-      console.log("Tache supprimé", notification);
-
-      setTasks(prev => prev.filter(task => task._id !== notification.taskId))
-
-      toast(notification.message, {
-        icon: "🗑️"
-      })
-    })
-
-    socketServices.onPersonalTaskCreated((notification) => {
-      toast.success(notification.message)
-    })
-
-    socketServices.onStatUpdate((notification) => {
-      if (notification.userId === userId) {
-        setStats(notification.stats)
-      }
-    })
-
-    socketServices.onTaskViewed((notification) => {
-      toast(notification.message, {
-        icon: '👀',
-      });
-    });
-
-    socketServices.onUserStatusChanged((data) => {
-      setOnlineUsers(prev => {
-        const newSet = new Set(prev);
-        if (data.status === "online") {
-          newSet.add(data.userId)
-        } else {
-          newSet.delete(data.userId)
+        // Ne pas ajouter la tâche si l'auteur est l'utilisateur actuel
+        // car elle est déjà ajoutée via la réponse de l'API
+        const currentUserId = user?._id;
+        if (data.authorId !== currentUserId) {
+          setTasks(prev => [data.task, ...prev]);
         }
-        return newSet
-      })
-    })
+
+        // Afficher la notification
+        if (data.message) {
+          toast(data.message, {
+            icon: <CheckmarkIcon />,
+          });
+        }
+      } catch (error) {
+        console.error("Erreur pour ajouter une tâche", error);
+      }
+    }
+    // Gestionnaire pour la mise à jour d'une tâche
+    const handleUpdateTask: SocketTaskEvents['taskUpdated'] = (data) => {
+      try {
+        console.log("Tâche mise à jour", data);
+
+        if (!data || !data.task) {
+          console.error("Données de tâche manquantes dans la notification", data);
+          return;
+        }
+
+        setTasks(prev => prev.map(task => task._id === data.task._id ? data.task : task));
+
+        // Afficher la notification de mise à jour
+        if (data.message) {
+          toast(data.message, {
+            icon: data.change?.status ? '🔄' : data.change?.priority ? '⚠️' : '📝',
+          });
+        }
+      } catch (error) {
+        console.error("Erreur pour mettre à jour une tâche", error);
+      }
+    }
+    // Gestionnaire pour la suppression d'une tâche
+    const handleDeleteTask: SocketTaskEvents['taskDeleted'] = (data) => {
+      try {
+        console.log("Tâche supprimée", data);
+
+        setTasks(prev => prev.filter(task => task._id !== data.taskId));
+
+        if (data.message) {
+          toast(data.message, {
+            icon: "🗑️"
+          });
+        }
+      } catch (error) {
+        console.error("Erreur pour supprimer une tâche", error);
+      }
+    }
+
+    // Gestionnaire pour la création d'une tâche personnelle
+    const handlePersonalCreateTask: SocketTaskEvents['personalTaskCreated'] = (data) => {
+      try {
+        console.log("Tâche personnelle reçue", data);
+        
+        if (data.message) {
+          toast.success(data.message);
+        }
+        
+        if (data.task) {
+          setTasks(prev => [data.task, ...prev]);
+        }
+      } catch (error) {
+        console.error("Erreur pour ajouter une tâche personnelle", error);
+      }
+    }
+    const handleStatUpdate: SocketStatEvents['statUpdated'] = (data) => {
+      try {
+        if (data.userId === saveUser) {
+          setStats(data.stats);
+        }
+      } catch (error) {
+        console.error("Erreur pour mettre à jour les stats", error);
+      }
+    }
+
+    const handleTaskView: SocketTaskEvents['taskViewed'] = (notification) => {
+      try {
+        toast(notification.message, {
+        icon: '👀',
+        });
+      } catch (error) {
+        console.error("Erreur pour afficher une notification de vue de tâche", error);
+      }
+    }
+
+    const handleUserStatusChange: SocketUserStatusEvents["userStatusChanged"] = (data) => {
+      try {
+        setOnlineUsers(prev => {
+          const newSet = new Set(prev);
+          if (data.status === "online") {
+            newSet.add(data.userId);
+          } else {
+            newSet.delete(data.userId);
+          }
+          return newSet;
+        });
+      } catch (error) {
+        console.error("Erreur pour mettre à jour les utilisateurs en ligne", error);
+      }
+    }
+    socketServices.onTaskCreated(handleCreateTask)
+    socketServices.onTaskUpdated(handleUpdateTask)
+    socketServices.onTaskDeleted(handleDeleteTask)
+    socketServices.onPersonalTaskCreated(handlePersonalCreateTask)
+    socketServices.onStatUpdate(handleStatUpdate)
+    socketServices.onTaskViewed(handleTaskView);
+    socketServices.onUserStatusChanged(handleUserStatusChange)
 
     //Netoyage
     return () => {
       socketServices.removeAllListeners();
     }
-  }, [user?._id]); // Use optional chaining in case user is null
+  }, [user]); // Use optional chaining in case user is null
 
 
 

@@ -5,8 +5,8 @@ export interface Task {
     title: string;
     description: string;
     completed?: boolean;
-    status?: 'pending' | 'in_progress' | 'done' | 'canceled';
-    priority?: 'low' | 'medium' | 'high' | 'critical';
+    status?: string;
+    priority?: string;
     author?: {
         _id: string;
         userName: string;
@@ -20,7 +20,7 @@ export interface TaskProps {
     error: string | null;
     onlineUsers: Set<string>;
     stats: any;
-    addTask: (title: string, description: string, completed?: boolean) => Promise<void>;
+    addTask: (title: string, description: string, completed?: boolean,status?: string, priority?: string) => Promise<void>;
     getTasks: () => Promise<void>;
     getTaskById: (id: string) => Promise<Task | null>;
     updateTask: (id: string, task: Task) => Promise<void>;
