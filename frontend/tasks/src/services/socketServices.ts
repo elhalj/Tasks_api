@@ -1,6 +1,7 @@
 import io, { Socket } from 'socket.io-client';
 import type { Task, User } from '../context';
 
+// Événements de base de la socket
 export interface SocketEvents {
     connect: () => void;
     disconnect: () => void;
@@ -8,47 +9,113 @@ export interface SocketEvents {
     connected: (data: { message: string }) => void;
 }
 
-export interface Notification<T = Record<string, any>> {
-    message: string;
-    data: T;
-    [key: string]: any;
-}
-
+// Événements liés aux tâches
 export interface SocketTaskEvents {
-    taskCreated: (notification: Notification<{ task: Task, message: string, type:string, authorId?: string }>) => void;
-    taskUpdated: (notification: Notification<{ task: Task, previousTask: Task, message: string, change: {status: boolean, priority: boolean} }>) => void;
-    taskDeleted: (notification: Notification<{ taskId: string, taskTitle: string, deletedBy: string }>) => void;
-    taskViewed: (notification: Notification<{ taskId: string, viewedBy: string, taskTitle: string }>) => void;
-    personalTaskCreated: (notification: Notification<{task: Task, message: string, type: string}>) => void;
+    // Événement déclenché lorsqu'une tâche est créée
+    taskCreated: (data: { 
+      task: Task;                // La tâche créée
+      message: string;           // Message de notification
+      type: string;              // Type d'événement
+      authorId?: string;         // ID de l'auteur (optionnel)
+    }) => void;
+    
+    // Événement déclenché lorsqu'une tâche est mise à jour
+    taskUpdated: (data: {
+      task: Task;                // La tâche mise à jour
+      previousTask: Task;        // État précédent de la tâche
+      message: string;           // Message de notification
+      type: string;              // Type d'événement
+      change: {                  // Détails des changements
+        status: boolean;         // Si le statut a changé
+        priority: boolean;       // Si la priorité a changé
+      };
+    }) => void;
+    
+    // Événement déclenché lorsqu'une tâche est supprimée
+    taskDeleted: (data: { 
+      taskId: string;            // ID de la tâche supprimée
+      taskTitle: string;         // Titre de la tâche
+      deletedBy: string;         // ID de l'utilisateur qui a supprimé
+      message: string;           // Message de notification
+    }) => void;
+    
+    // Événement déclenché lorsqu'une tâche est consultée
+    taskViewed: (data: { 
+      taskId: string;            // ID de la tâche consultée
+      viewedBy: string;          // ID de l'utilisateur qui a consulté
+      taskTitle: string;         // Titre de la tâche
+      message: string;           // Message de notification
+    }) => void;
+    
+    // Événement pour la création d'une tâche personnelle
+    personalTaskCreated: (data: { 
+      task: Task;                // La tâche créée
+      message: string;           // Message de notification
+      type: string;              // Type d'événement
+    }) => void;
 }
 
+// Statistiques
 export interface Stat {
     users: User[];
     tasks: Task[];
 }
 
+// Événements liés aux statistiques
 export interface SocketStatEvents {
-    statUpdated: (notification: Notification<{ userId: string, stats: any }>) => void;
+    // Événement de mise à jour des statistiques
+    statUpdated: (data: { 
+      userId: string;            // ID de l'utilisateur concerné
+      stats: any;                // Nouvelles statistiques
+    }) => void;
 }
 
+// Événements liés au statut des utilisateurs
 export interface SocketUserStatusEvents {
-    userStatusChanged: (data: { userId: string, status: 'online' | 'offline' }) => void;
+    // Événement de changement de statut d'un utilisateur
+    userStatusChanged: (data: { 
+      userId: string;            // ID de l'utilisateur
+      status: 'online' | 'offline'; // Nouveau statut
+    }) => void;
 }
 
+// Événements liés aux salles de tâches
 export interface SocketTaskRoomEvents {
-    taskRoomUpdate: (data: { taskId: string, task: Task, updatedBy: string, timestamp: Date }) => void;
-    taskRoomDeleted: (taskId: string) => void;
+    // Mise à jour d'une salle de tâche
+    taskRoomUpdate: (data: { 
+      taskId: string;            // ID de la tâche
+      task: Task;                // Données mises à jour
+      updatedBy: string;         // ID de l'utilisateur qui a mis à jour
+      timestamp: Date;           // Horodatage de la mise à jour
+    }) => void;
+    
+    // Suppression d'une salle de tâche
+    taskRoomDeleted: (data: { 
+      taskId: string;            // ID de la tâche supprimée
+    }) => void;
 }
 
+// Méthodes liées aux salles de tâches
 export interface SocketTaskRoomMethods {
+    // Rejoindre une salle de tâche
     joinTaskRoom: (taskId: string) => void;
+    
+    // Quitter une salle de tâche
     leaveTaskRoom: (taskId: string) => void;
 }
 
+// Interface du service de socket
 export interface SocketServiceInterface {
+    // Se connecter au serveur
     connect: (token: string, userId: string) => Socket;
+    
+    // Se déconnecter
     disconnect: () => void;
+    
+    // Supprimer tous les écouteurs
     removeAllListeners: () => void;
+    
+    // Méthodes d'écoute des événements
     onTaskCreated: (callback: SocketTaskEvents['taskCreated']) => void;
     onTaskUpdated: (callback: SocketTaskEvents['taskUpdated']) => void;
     onTaskDeleted: (callback: SocketTaskEvents['taskDeleted']) => void;
@@ -56,6 +123,8 @@ export interface SocketServiceInterface {
     onPersonalTaskCreated: (callback: SocketTaskEvents['personalTaskCreated']) => void;
     onStatUpdate: (callback: SocketStatEvents['statUpdated']) => void;
     onUserStatusChanged: (callback: SocketUserStatusEvents['userStatusChanged']) => void;
+    
+    // Méthodes de gestion des salles
     joinTaskRoom: SocketTaskRoomMethods['joinTaskRoom'];
     leaveTaskRoom: SocketTaskRoomMethods['leaveTaskRoom'];
     onTaskRoomUpdated: (callback: SocketTaskRoomEvents['taskRoomUpdate']) => void;

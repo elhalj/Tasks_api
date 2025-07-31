@@ -24,6 +24,8 @@ const Tasks = () => {
                     <p className={`font-bold ${(task.completed === true) ? "line-through" : ""}`}>{task.title}</p>
                     <p className={`text-sm ${(task.completed === true) ? "line-through" : ""}`}>{task.description}</p>
                     <p className={(task.completed === false) ? "text-red-500" : "text-green-500"}>{task.completed ? 'Completé' : 'Non completé'}</p>
+                    <p className={`text-sm font-bold ${task.status === "pending" ? "text-yellow-500" : task.status === "in_progress" ? "text-blue-500" : task.status === "done" ? "text-green-500" : task.status === "canceled" ? "text-red-500" : ""}`}>{task.status}</p>
+                    <p className={`text-sm font-bold ${task.priority === "low" ? "text-green-500" : task.priority === "medium" ? "text-yellow-500" : task.priority === "high" ? "text-red-500" : ""}`}>{task.priority}</p>
                     {task._id && (
                         <div className='flex gap-2'>
                             <Link to={`/dashboard/tasks/${task._id}/edit`}><p className="text-white p-2 bg-blue-400 rounded-md">Modifier</p></Link>

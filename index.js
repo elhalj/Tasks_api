@@ -6,12 +6,34 @@ import { taskRoutes } from "./src/routes/task.route.js";
 import dotenv from "dotenv";
 import { authRoute } from "./src/routes/user.route.js";
 import { authenticate } from "./src/middleware/authmiddleware.js";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
 const app = Fastify({
   logger: true,
 });
+
+// Fonction utilitaire pour vérifier le token JWT
+const verifySocketToken = async (token) => {
+  try {
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET n'est pas défini dans les variables d'environnement");
+      throw new Error("Erreur de configuration du serveur");
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    if (!decoded || !decoded.userId) {
+      throw new Error("Token invalide: informations manquantes");
+    }
+    
+    return decoded;
+  } catch (error) {
+    console.error("Erreur de vérification du token:", error.message);
+    throw new Error("Token invalide");
+  }
+};
 
 // Middleware pour parser le token JWT
 app.decorate("authenticate", authenticate);
@@ -41,16 +63,24 @@ async function startServer() {
     io.use(async (socket, next) => {
       try {
         const token = socket.handshake.auth.token;
-        if (token) {
-          // Vérifier le token ici
-          const user = await authenticate(token);
-          socket.userId = user.id;
-          socket.join(`user_${user.id}`); // Rejoindre une room personnelle
+        
+        if (!token) {
+          return next(new Error("Token manquant"));
         }
+
+        const decode = await verifySocketToken(token);
+        if (!decode || !decode.userId) {
+          return next(new Error("Token invalide"));
+        }
+        socket.userId = decode.userId;
+        // Rejoint la room de l'utilisateur
+        socket.join(`user_${socket.userId}`);
+
+        console.log(`Socket authenticated for user:  ${socket.userId}`);
         next();
       } catch (err) {
         console.log("Socket auth failed:", err.message);
-        next(); // Permettre les connexions non authentifiées pour certains cas
+        next(new Error("Authenticate failed")); // Permettre les connexions non authentifiées pour certains cas
       }
     });
 
@@ -59,7 +89,7 @@ async function startServer() {
 
     // Socket.IO events
     io.on("connection", (socket) => {
-      console.log(`New client connected: ${socket.id}`);
+      console.log(`New client connected: ${socket.id}, User ${socket.userId}`);
 
       // Si l'utilisateur est authentifié, joindre sa room personnelle
       if (socket.userId) {
@@ -76,11 +106,19 @@ async function startServer() {
 
       // Événements personnalisés
       socket.on("joinTaskRoom", (taskId) => {
+        if (!taskId || typeof taskId !== "string") {
+          socket.emit("error", { message: "Invalid task ID" });
+          return;
+        }
         socket.join(`task_${taskId}`);
         console.log(`Socket ${socket.id} joined task room: ${taskId}`);
       });
 
       socket.on("leaveTaskRoom", (taskId) => {
+        if (!taskId || typeof taskId !== "string") {
+          socket.emit("error", { message: "Invalid task ID" });
+          return;
+        }
         socket.leave(`task_${taskId}`);
         console.log(`Socket ${socket.id} left task room: ${taskId}`);
       });
@@ -117,6 +155,13 @@ async function startServer() {
     // Routes pour les notifications en temps réel
     app.post("/api/v1/broadcast", async (request, reply) => {
       const { event, data, room } = request.body;
+
+      if (!event || typeof event !== "string") {
+        return reply.code(400).send({
+          success: false,
+          error: "Event name is required",
+        });
+      }
 
       if (room) {
         io.to(room).emit(event, data);

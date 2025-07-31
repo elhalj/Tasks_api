@@ -9,9 +9,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const saveUser = localStorage.getItem("user");
         if (saveUser) {
-            setUser(JSON.parse(saveUser));
+            try {
+                setUser(JSON.parse(saveUser));
+            } catch (error) {
+                console.error("Error parsing saved user:", error);
+                localStorage.removeItem("user");
+            }
         }
     }, []);
+
+    useEffect(() => {
+        if (token) {
+            instance.defaults.headers.common['Authorization'] = `Bearer ${token};`
+        } else {
+            delete instance.defaults.headers.common['Authorization'];
+        }
+    }, [token]);
 
     const login = useCallback(async (email: string, password: string) => {
         try {
@@ -47,11 +60,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, []);
 
-    const logout = useCallback(() => {
+    const logout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
         setToken(null);
         setUser(null);
-    }, []);
+        window.location.href = "/"
+    };
 
     // Set up axios interceptor for token
     if (token) {

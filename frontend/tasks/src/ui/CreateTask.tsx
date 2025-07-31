@@ -1,18 +1,25 @@
 import { useContext, useState } from "react";
 import { TaskContext } from "../context";
-import toast from "react-hot-toast";
 
 interface TaskProps {
   title: string;
   description: string;
   completed: boolean;
+  status: string;
+  priority: string;
 }
+
+const statusTable = ["pending", "in_progress", "done", "canceled"];
+const priorityTable = ["low", "medium", "high", "critical"];
+
 const CreateTask = () => {
   const { addTask } = useContext(TaskContext);
   const [myTask, setMyTask] = useState<TaskProps>({
     title: "",
     description: "",
     completed: false,
+    status: "pending",
+    priority: "low"
   });
   const [loading, setLoading] = useState(false);
 
@@ -25,6 +32,11 @@ const CreateTask = () => {
     }
   };
 
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setMyTask((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setMyTask((prev) => ({ ...prev, [name]: value }));
@@ -34,9 +46,9 @@ const CreateTask = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await addTask(myTask.title, myTask.description, myTask.completed);
+      await addTask(myTask.title, myTask.description, myTask.completed, myTask.status, myTask.priority);
       // toast.success("Ajouté avec succès");
-      setMyTask({ title: "", description: "", completed: false });
+      setMyTask({ title: "", description: "", completed: false , status:"", priority:""});
     } catch (error) {
       console.error(error);
     } finally {
@@ -74,6 +86,36 @@ const CreateTask = () => {
             name="completed"
             className="mr-2 h-6 w-6"
           />
+        </label>
+        <label className="flex flex-col">
+          Status
+          <select
+            value={myTask.status}
+            onChange={handleSelectChange}
+            name="status"
+            className="border border-gray-300 rounded p-2"
+          >
+            {statusTable.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col">
+          Priorité
+          <select
+            value={myTask.priority}
+            onChange={handleSelectChange}
+            name="priority"
+            className="border border-gray-300 rounded p-2"
+          >
+            {priorityTable.map((priority) => (
+              <option key={priority} value={priority}>
+                {priority}
+              </option>
+            ))}
+          </select>
         </label>
         <button
           type="submit"
