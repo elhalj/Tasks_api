@@ -46,7 +46,6 @@ const Tasks = ({ viewMode }: {viewMode: string}) => {
               <MoreHorizontal className="w-4 h-4" />{}
             </button>
           </div>
-
           <h3 className="text-lg font-semibold text-white mb-2 line-clamp-2">
             {task.title}
           </h3>

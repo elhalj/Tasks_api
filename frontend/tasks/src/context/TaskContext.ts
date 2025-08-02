@@ -23,6 +23,7 @@ export interface TaskProps {
     onlineUsers: Set<string>;
     stats: any;
     addTask: (title: string, description: string, completed?: boolean,status?: string, priority?: string, progress?:number) => Promise<void>;
+
     getTasks: () => Promise<void>;
     getTaskById: (id: string) => Promise<Task | null>;
     updateTask: (id: string, task: Task) => Promise<void>;

@@ -161,7 +161,6 @@ const UpdateTask = () => {
             className="border border-gray-300 rounded p-2"
           />
         </label>
-
         {/* Bouton pour soumettre le formulaire */}
         <button
           type="submit"
