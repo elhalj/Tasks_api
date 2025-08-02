@@ -24,7 +24,7 @@ const UtilsBar = ({
           className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl"
         >
           <Plus className="w-4 h-4" />
-          <Link to="/dashboard/add/task" >Ajouter une tache</Link>
+          <Link to="/dashboard/add/task">Ajouter une tache</Link>
         </button>
       </div>
 
@@ -42,9 +42,10 @@ const UtilsBar = ({
         <button
           type="button"
           className="p-2 text-gray-300 hover:text-white transition-colors"
+          aria-label="Calendar view"
+          title="Switch to calendar view"
         >
           <Calendar className="w-5 h-5" />
-          {/* TODO: Ajouter un tooltip pour expliquer ce que fait ce bouton */}
         </button>
         {/* Bouton pour changer le mode d'affichage */}
         <div className="flex bg-white/10 rounded-lg p-1">
