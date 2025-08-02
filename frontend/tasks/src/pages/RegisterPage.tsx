@@ -3,7 +3,7 @@ import Register from '../ui/register'
 
 const RegisterPage = () => {
   return (
-    <div>
+    <div className='flex items-center justify-center h-screen'>
       <Register />
     </div>
   )

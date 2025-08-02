@@ -7,6 +7,8 @@ export interface Task {
     completed?: boolean;
     status?: string;
     priority?: string;
+    progress?: number;
+    updatedAt?: string | number | Date;
     author?: {
         _id: string;
         userName: string;
@@ -20,7 +22,7 @@ export interface TaskProps {
     error: string | null;
     onlineUsers: Set<string>;
     stats: any;
-    addTask: (title: string, description: string, completed?: boolean,status?: string, priority?: string) => Promise<void>;
+    addTask: (title: string, description: string, completed?: boolean,status?: string, priority?: string, progress?:number) => Promise<void>;
     getTasks: () => Promise<void>;
     getTaskById: (id: string) => Promise<Task | null>;
     updateTask: (id: string, task: Task) => Promise<void>;

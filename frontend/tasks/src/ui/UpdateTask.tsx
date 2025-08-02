@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { TaskContext } from "../context";
-import toast from "react-hot-toast";
 
 // Types pour la tâche
 interface TaskProps {
@@ -11,6 +10,7 @@ interface TaskProps {
   completed?: boolean;
   status?: string;
   priority?: string;
+  progress?: number
 }
 
 // Composant pour mettre à jour une tâche
@@ -25,7 +25,8 @@ const UpdateTask = () => {
     description: myTask?.description || "",
     completed: myTask?.completed || false,
     status: myTask?.status || "pending",
-    priority: myTask?.priority || "low"
+    priority: myTask?.priority || "low",
+    progress: myTask?.progress || 0
   });
 
   // On met à jour l'état de la tâche si elle change dans la liste des tâches
@@ -72,6 +73,11 @@ const UpdateTask = () => {
 
   return (
     <>
+      {/* Formulaire pour mettre à jour la tâche */}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-gray-100 p-4 rounded-md flex flex-col gap-4 w-[600px]"
+      >
       <p>
         <Link
           to="/dashboard"
@@ -80,11 +86,6 @@ const UpdateTask = () => {
           Retourner au dashboard
         </Link>
       </p>
-      {/* Formulaire pour mettre à jour la tâche */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-100 p-4 rounded-md flex flex-col gap-4"
-      >
         {/* Champ pour le titre */}
         <label className="flex flex-col">
           Titre:
@@ -147,6 +148,20 @@ const UpdateTask = () => {
             <option value="critical">critical</option>
           </select>
         </label>
+        {/* Champ pour la progression */}
+        <label className="flex flex-col">
+          Progression:
+          <input
+            type="number"
+            name="progress"
+            value={task.progress}
+            onChange={handleChange}
+            min={0}
+            max={100}
+            className="border border-gray-300 rounded p-2"
+          />
+        </label>
+
         {/* Bouton pour soumettre le formulaire */}
         <button
           type="submit"

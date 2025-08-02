@@ -37,9 +37,9 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
   }, []);
 
   // Add a new task
-  const addTask = useCallback(async (title: string, description: string, completed: boolean = false, status: string = "pending", priority: string = "low") => {
+  const addTask = useCallback(async (title: string, description: string, completed: boolean = false, status: string = "pending", priority: string = "low", progress: number = 0) => {
     try {
-      const res = await instance.post("/add/tasks", { title, description, completed, status, priority });
+      const res = await instance.post("/add/tasks", { title, description, completed, status, priority, progress });
       setTasks(prevTasks => [...prevTasks, res.data]);
       setError(null);
       return res.data;

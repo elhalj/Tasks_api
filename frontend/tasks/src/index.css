@@ -1,9 +1,32 @@
 @import "tailwindcss";
+
+* {
+  @apply tracking-wide;
+  @apply leading-relaxed;
+}
+
+
 body {
-  @apply bg-gray-700;
-  @apply flex;
-  @apply flex-col;
-  @apply items-center;
-  @apply justify-center;
+  @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900;
   @apply min-h-screen;
+}
+
+.task-card {
+  @apply transform transition-all duration-300 hover:scale-105 hover:shadow-2xl;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
