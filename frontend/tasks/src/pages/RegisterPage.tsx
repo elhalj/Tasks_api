@@ -1,4 +1,4 @@
-import React from 'react'
+
 import Register from '../ui/register'
 
 const RegisterPage = () => {

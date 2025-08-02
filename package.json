@@ -25,6 +25,7 @@
   },
   "scripts": {
     "dev": "nodemon index.js",
+    "start": "bun run index.js",
     "release": "semantic-release",
     "commit": "git-cz"
   },
