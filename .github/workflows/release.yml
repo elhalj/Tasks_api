@@ -8,9 +8,9 @@ on:
 
 # Ajout des permissions nécessaires
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+  contents: read|write
+  issues: read|write
+  pull-requests: read|write
 
 jobs:
   release:
@@ -26,8 +26,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
