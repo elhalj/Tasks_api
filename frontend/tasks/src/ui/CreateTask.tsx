@@ -7,6 +7,7 @@ interface TaskProps {
   completed: boolean;
   status: string;
   priority: string;
+  progress: number
 }
 
 const statusTable = ["pending", "in_progress", "done", "canceled"];
@@ -19,7 +20,6 @@ const CreateTask = () => {
     description: "",
     completed: false,
     status: "pending",
-    priority: "low"
   });
   const [loading, setLoading] = useState(false);
 
@@ -46,9 +46,10 @@ const CreateTask = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await addTask(myTask.title, myTask.description, myTask.completed, myTask.status, myTask.priority);
+      
+      await addTask(myTask.title, myTask.description, myTask.completed, myTask.status, myTask.priority, myTask.progress);
       // toast.success("Ajouté avec succès");
-      setMyTask({ title: "", description: "", completed: false , status:"", priority:""});
+      setMyTask({ title: "", description: "", completed: false , status:"", priority:"", progress:0});
     } catch (error) {
       console.error(error);
     } finally {
@@ -57,43 +58,45 @@ const CreateTask = () => {
   };
   return (
     <>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
         <label className="flex flex-col">
-          Titre
+          <span className="text-lg font-bold">Titre</span>
           <input
             type="text"
             value={myTask.title}
             onChange={handleInputChange}
             name="title"
-            className="border border-gray-300 rounded p-2"
+            placeholder="Entrez un titre"
+            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
         <label className="flex flex-col">
-          Description
+          <span className="text-lg font-bold">Description</span>
           <textarea
             value={myTask.description}
             onChange={handleTextAreaChange}
             name="description"
-            className="border border-gray-300 rounded p-2"
+            placeholder="Entrez une description"
+            className="p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
         <label className="flex gap-1 items-center">
-          Completed
+          <span className="text-lg font-bold">Completed</span>
           <input
             type="checkbox"
             checked={myTask.completed}
             onChange={handleInputChange}
             name="completed"
-            className="mr-2 h-6 w-6"
+            className="mr-2 h-6 w-6 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
         <label className="flex flex-col">
-          Status
+          <span className="text-lg font-bold">Status</span>
           <select
             value={myTask.status}
             onChange={handleSelectChange}
             name="status"
-            className="border border-gray-300 rounded p-2"
+            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {statusTable.map((status) => (
               <option key={status} value={status}>
@@ -103,12 +106,12 @@ const CreateTask = () => {
           </select>
         </label>
         <label className="flex flex-col">
-          Priorité
+          <span className="text-lg font-bold">Priorité</span>
           <select
             value={myTask.priority}
             onChange={handleSelectChange}
             name="priority"
-            className="border border-gray-300 rounded p-2"
+            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {priorityTable.map((priority) => (
               <option key={priority} value={priority}>
@@ -117,10 +120,23 @@ const CreateTask = () => {
             ))}
           </select>
         </label>
+        <label className="flex flex-col">
+          <span className="text-lg font-bold">Progress</span>
+          <input
+            type="number"
+            value={myTask.progress}
+            onChange={handleInputChange}
+            name="progress"
+            min={0}
+            max={100}
+            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </label>
+
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {loading ? "Ajout en cours..." : "Ajouter"}
         </button>

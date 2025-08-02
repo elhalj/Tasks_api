@@ -18,6 +18,10 @@ const taskSchema = new mongoose.Schema(
       enum: ["low", "medium", "high", "critical"],
       default: "low",
     },
+    progress: {
+      type: Number,
+      default: 0,
+    },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

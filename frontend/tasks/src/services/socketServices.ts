@@ -134,10 +134,12 @@ export interface SocketServiceInterface {
 class SocketService implements SocketServiceInterface {
     private socket: Socket | null;
     private isConnected: boolean;
+    private SOCKET_URL: string;
 
     constructor() {
         this.socket = null;
         this.isConnected = false;
+        this.SOCKET_URL = import.meta.env.VITE_SOCKET_URL
     }
 
     connect(token: string, userId: string): Socket {
@@ -145,7 +147,7 @@ class SocketService implements SocketServiceInterface {
             this.disconnect();
         }
 
-        this.socket = io('http://localhost:3000', {
+        this.socket = io(this.SOCKET_URL, {
             auth: {
                 token: token,
                 userId: userId
