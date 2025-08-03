@@ -20,6 +20,8 @@ const CreateTask = () => {
     description: "",
     completed: false,
     status: "pending",
+    priority: "low",
+    progress:0
   });
   const [loading, setLoading] = useState(false);
 
