@@ -133,13 +133,13 @@ export interface SocketServiceInterface {
 
 class SocketService implements SocketServiceInterface {
     private socket: Socket | null;
-    public isConnected: boolean;
-    private SOCKET_URL: string;
+    private isConnected: boolean;
+    private socket_url: string;
 
     constructor() {
         this.socket = null;
         this.isConnected = false;
-        this.SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000"
+        this.socket_url = import.meta.env.VITE_SOCKET_URL
     }
 
     connect(token: string, userId: string): Socket {
@@ -147,7 +147,7 @@ class SocketService implements SocketServiceInterface {
             this.disconnect();
         }
 
-        this.socket = io(this.SOCKET_URL, {
+        this.socket = io(this.socket_url, {
             auth: {
                 token: token,
                 userId: userId

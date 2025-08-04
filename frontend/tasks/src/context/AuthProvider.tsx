@@ -6,23 +6,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
+    // Essaye de récupérer l'utilisateur stocké en local
     useEffect(() => {
         const saveUser = localStorage.getItem("user");
         if (saveUser) {
             try {
+                // Essaye de parser l'utilisateur stocké en local
                 setUser(JSON.parse(saveUser));
             } catch (error) {
-                console.error("Error parsing saved user:", error);
+                console.error(
+                    "Erreur lors de la lecture de l'utilisateur stocké en local:",
+                    error
+                );
+                // Si l'utilisateur stocké en local est corrompu, on le supprime
                 localStorage.removeItem("user");
             }
         }
     }, []);
 
     useEffect(() => {
-        if (token) {
-            instance.defaults.headers.common['Authorization'] = `Bearer ${token};`
-        } else {
-            delete instance.defaults.headers.common['Authorization'];
+        try {
+            // Si un token est disponible, on l'ajoute en entête par défaut pour les requêtes
+            if (token) {
+                instance.defaults.headers.common['Authorization'] = `Bearer ${token};`
+            } else {
+                // Si pas de token, on supprime l'entête par défaut
+                delete instance.defaults.headers.common['Authorization'];
+            }
+        } catch (error) {
+            console.error("Erreur lors de la mise en place de l'entête de requête:", error);
+                // On redirige vers la page de connexion
+            window.location.href = "/login"
         }
     }, [token]);
 
