@@ -18,16 +18,18 @@ const app = Fastify({
 const verifySocketToken = async (token) => {
   try {
     if (!process.env.JWT_SECRET) {
-      console.error("JWT_SECRET n'est pas défini dans les variables d'environnement");
+      console.error(
+        "JWT_SECRET n'est pas défini dans les variables d'environnement"
+      );
       throw new Error("Erreur de configuration du serveur");
     }
-    
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     if (!decoded || !decoded.userId) {
       throw new Error("Token invalide: informations manquantes");
     }
-    
+
     return decoded;
   } catch (error) {
     console.error("Erreur de vérification du token:", error.message);
@@ -63,7 +65,7 @@ async function startServer() {
     io.use(async (socket, next) => {
       try {
         const token = socket.handshake.auth.token;
-        
+
         if (!token) {
           return next(new Error("Token manquant"));
         }

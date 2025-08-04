@@ -42,7 +42,11 @@ const Login = () => {
     }
 
   return (
-    <div className="flex justify-center">
+      <div className="flex flex-col justify-center">
+          <button type='button' className="text-center mb-2 bg-indigo-400/50 backdrop-blur-lg backdrop-filter  border border-blue-100 rounded-md hover:bg-indigo-300 cursor-pointer">
+              <Link to="/" className="text-white hover:underline">Retourner sur la page d'accueil</Link>
+          </button>
+          
           <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2">
                   Email *

@@ -1,6 +1,7 @@
 import { Bell, CheckCircle2, Menu, Search, User, X } from "lucide-react";
 import { useContext, useState } from "react";
 import { AuthContext } from "../context";
+import { NavLink } from "react-router-dom";
 
 const Header = () => {
   const { user, logout } = useContext(AuthContext);
@@ -17,7 +18,7 @@ const Header = () => {
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
                 <CheckCircle2 className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-white">TaskFlow</h1>
+              <h1 className="text-2xl font-bold text-white"><NavLink to="/">TaskFlow</NavLink></h1>
             </div>
 
             {/* Menu burger sur mobile */}
@@ -81,7 +82,7 @@ const Header = () => {
           <div className="fixed inset-0 z-10 flex justify-center">
             <div className="w-full max-w-md mx-4 mt-16 bg-white/10 backdrop-blur-lg rounded-lg p-4">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-white">TaskFlow</h2>
+                <h2 className="text-2xl font-bold text-white"><NavLink to="/">TaskFlow</NavLink></h2>
                 <button
                   type="button"
                   onClick={() => setShowMenu(false)}
@@ -122,7 +123,7 @@ const Header = () => {
                 <button
                   type="button"
                   onClick={logout}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
                 >
                   Logout
                 </button>

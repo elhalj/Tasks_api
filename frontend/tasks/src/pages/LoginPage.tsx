@@ -1,4 +1,4 @@
-import React from 'react'
+
 import Login from '../ui/login'
 
 const LoginPage = () => {
