@@ -146,7 +146,6 @@ class SocketService implements SocketServiceInterface {
         if (this.socket) {
             this.disconnect();
         }
-
         this.socket = io(this.socket_url, {
             auth: {
                 token: token,
