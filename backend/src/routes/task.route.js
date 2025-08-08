@@ -3,13 +3,9 @@ import Task from "../models/tasks.model.js";
 import { v4 as uuidv4 } from "uuid";
 import User from "../models/user.model.js";
 import Room from "../models/room.model.js";
+import { isValidObjectId } from "../helpers/validateId.js";
 
 export const taskRoutes = async (fastify, options) => {
-  // Fonction utilitaire pour valider les ObjectId MongoDB
-  const isValidObjectId = (id) => {
-    return mongoose.Types.ObjectId.isValid(id);
-  };
-
   const emitTaskNotification = (events, data, userId = null) => {
     try {
       const notification = {
