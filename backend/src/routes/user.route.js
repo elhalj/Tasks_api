@@ -4,11 +4,20 @@ import { generateToken } from "../utils/token.js";
 export const authRoute = async (fastify) => {
   //get ALL user (Admin)
   fastify.get("/getAll/user", async (request, reply) => {
-    const users = await User.find().populate("myTasks");
+    const users = await User.find()
+      .populate("myTasks")
+      .populate("rooms")
+      .populate("notifications");
+
     return users.map((user) => ({
       _id: user._id,
       userName: user.userName,
       email: user.email,
+      role: user.role,
+      profile: user.profile,
+      status: user.status,
+      rooms: user.rooms,
+      notifications: user.notifications,
       myTasks: user.myTasks,
     }));
   });

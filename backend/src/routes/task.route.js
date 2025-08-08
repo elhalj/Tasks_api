@@ -2,13 +2,10 @@ import mongoose from "mongoose";
 import Task from "../models/tasks.model.js";
 import { v4 as uuidv4 } from "uuid";
 import User from "../models/user.model.js";
+import Room from "../models/room.model.js";
+import { isValidObjectId } from "../helpers/validateId.js";
 
 export const taskRoutes = async (fastify, options) => {
-  // Fonction utilitaire pour valider les ObjectId MongoDB
-  const isValidObjectId = (id) => {
-    return mongoose.Types.ObjectId.isValid(id);
-  };
-
   const emitTaskNotification = (events, data, userId = null) => {
     try {
       const notification = {
@@ -58,17 +55,68 @@ export const taskRoutes = async (fastify, options) => {
   /**
    * Add Tasks
    */
+  /**
+   * Ajouter une tâche
+   *
+   * @param {string} title          Titre de la tâche
+   * @param {string} description    Description de la tâche
+   * @param {Date}   dueDate        Date d'échéance de la tâche
+   * @param {number} estimatedHours Heures estimées pour la tâche
+   * @param {string[]} assignees    Identifiants des utilisateurs assignés
+   * @param {string}  roomId        Identifiant de la salle de la tâche
+   * @param {string}  priority      Priorité de la tâche (low, medium, high, critical)
+   * @param {string}  status        Statut de la tâche (pending, in_progress, done, canceled)
+   */
   fastify.post(
     "/add/tasks",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
       try {
-        //Validation des données
-        const { title, description } = request.body;
+        const {
+          title,
+          description,
+          dueDate,
+          estimatedHours,
+          assignees,
+          roomId,
+          priority = "low",
+          status = "pending",
+        } = request.body;
+
+        // Valider que les utilisateurs assignés existent
+        if (assignees && assignees.length > 0) {
+          const existingUsers = await User.find({ _id: { $in: assignees } });
+          if (existingUsers.length !== assignees.length) {
+            return reply.code(400).send({
+              success: false,
+              error: "Un ou plusieurs utilisateurs assignés n'existent pas",
+            });
+          }
+        }
+
+        // Vérifier que la salle existe et que l'utilisateur y a accès
+        let room = null;
+        if (roomId) {
+          room = await Room.findOne({
+            _id: roomId,
+            $or: [
+              { admin: request.user.userId },
+              { members: request.user.userId },
+            ],
+          });
+
+          if (!room) {
+            return reply.code(403).send({
+              success: false,
+              error: "Salle non trouvée ou accès non autorisé",
+            });
+          }
+        }
+
         if (!title || typeof title !== "string" || title.trim() === "") {
           return reply.code(400).send({
             success: false,
-            error: "Le titre de la tache est obligatoire",
+            error: "Le titre de la tâche est obligatoire",
           });
         }
 
@@ -83,46 +131,125 @@ export const taskRoutes = async (fastify, options) => {
           });
         }
 
-        // Créer la tâche avec l'auteur
-        const task = new Task({
-          ...request.body,
-          author: request.user.userId, // L'ID de l'utilisateur est ajouté depuis le token JWT
-        });
+        // Convertir la date si elle est fournie comme chaîne
+        let dueDateObj;
+        if (dueDate) {
+          dueDateObj = new Date(dueDate);
+          if (isNaN(dueDateObj.getTime())) {
+            return reply.code(400).send({
+              success: false,
+              error: "Format de date d'échéance invalide",
+            });
+          }
 
-        // Sauvegarder la tâche
-        const savedTask = await task.save();
+          // Vérifier que la date est dans le futur
+          if (dueDateObj <= new Date()) {
+            return reply.code(400).send({
+              success: false,
+              error: "La date d'échéance doit être une date future",
+            });
+          }
+        }
 
-        // Trouver l'utilisateur et ajouter la tâche à son tableau myTasks
-        await User.findByIdAndUpdate(
-          request.user.userId,
-          { $push: { myTasks: savedTask._id } },
-          { new: true, useFindAndModify: false }
-        );
+        if (!estimatedHours || typeof estimatedHours !== "number") {
+          return reply.code(400).send({
+            success: false,
+            error: "Vous devez préciser l'heure d'estimation",
+          });
+        }
 
-        //Notification en temps réel
-        emitTaskNotification("taskCreated", {
-          task: savedTask,
-          message: `Nouvelle tache créée. Titre:  ${savedTask.title}`,
-          type: "success",
-          authorId: request.user.userId,
-        });
+        if (!assignees || assignees.length === 0) {
+          return reply.code(400).send({
+            success: false,
+            error: "Vous devez assigner au moins une personne",
+          });
+        }
 
-        //Notification personnelle à l'utilisateur
-        emitTaskNotification(
-          "personalTaskCreated",
-          {
+        // Créer la tâche avec les données validées
+        const taskData = {
+          title: title.trim(),
+          description: description ? description.trim() : "",
+          status,
+          priority,
+          dueDate: dueDateObj,
+          estimatedHours: parseFloat(estimatedHours) || 0,
+          assignees,
+          author: request.user.userId,
+          startDate: new Date(),
+          room: roomId,
+        };
+
+        const task = new Task(taskData);
+
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+          const savedTask = await task.save({ session });
+
+          // Mettre à jour l'auteur avec la nouvelle tâche
+          await User.findByIdAndUpdate(
+            request.user.userId,
+            { $addToSet: { myTasks: savedTask._id } },
+            { session }
+          );
+
+          // Mettre à jour les utilisateurs assignés
+          await User.updateMany(
+            { _id: { $in: assignees } },
+            { $addToSet: { collaborators: savedTask._id } },
+            { session }
+          );
+
+          // Mettre à jour la salle avec la nouvelle tâche si nécessaire
+          if (roomId) {
+            await Room.findByIdAndUpdate(
+              roomId,
+              { $addToSet: { tasks: savedTask._id } },
+              { session }
+            );
+          }
+
+          await session.commitTransaction();
+          session.endSession();
+
+          // Notifications
+          emitTaskNotification("taskCreated", {
             task: savedTask,
-            message: "Votre tache a été créée avec succès",
-            type: "info",
-          },
-          request.user.userId
-        );
+            message: `Nouvelle tâche créée: ${savedTask.title}`,
+            type: "success",
+            authorId: request.user.userId,
+          });
 
-        return savedTask;
+          // Notifier les utilisateurs assignés
+          assignees.forEach((userId) => {
+            if (userId.toString() !== request.user.userId.toString()) {
+              emitTaskNotification(
+                "taskAssigned",
+                {
+                  task: savedTask,
+                  message: `Vous avez été assigné à la tâche: ${savedTask.title}`,
+                  type: "info",
+                },
+                userId
+              );
+            }
+          });
+
+          return savedTask;
+        } catch (error) {
+          await session.abortTransaction();
+          session.endSession();
+          throw error; // Laisser le bloc catch global gérer l'erreur
+        }
       } catch (error) {
-        reply
-          .code(500)
-          .send({ error: "Erreur lors de la création de la tâche" });
+        console.error("Erreur lors de la création de la tâche:", error);
+        reply.code(500).send({
+          success: false,
+          error: "Une erreur est survenue lors de la création de la tâche",
+          details:
+            process.env.NODE_ENV === "development" ? error.message : undefined,
+        });
       }
     }
   );
@@ -156,11 +283,41 @@ export const taskRoutes = async (fastify, options) => {
         }
 
         // Valider les données de la requête
-        const { title, description } = request.body;
+        const { title, description, dueDate, estimatedHours } = request.body;
         if (title && (typeof title !== "string" || title.trim() === "")) {
           return reply.code(400).send({
             success: false,
             error: "Le titre de la tâche est invalide",
+          });
+        }
+        dueDate, estimatedHours;
+
+        if (
+          description &&
+          (typeof description !== "string" || description.trim === "")
+        ) {
+          return reply
+            .code(400)
+            .send({ success: false, error: "la description est invalide" });
+        }
+
+        if (dueDate && !(dueDate instanceof Date)) {
+          return reply
+            .code(400)
+            .send({ success: false, error: "L'échéance doit etre une date" });
+        }
+
+        if (dueDate && dueDate <= new Date()) {
+          return reply.code(400).send({
+            success: false,
+            error: "L'échéance doit etre une date future",
+          });
+        }
+
+        if (estimatedHours && typeof estimatedHours !== "number") {
+          return reply.code(400).send({
+            success: false,
+            error: "L'heure d'estimation doit etre un nombre",
           });
         }
 
@@ -168,6 +325,7 @@ export const taskRoutes = async (fastify, options) => {
         const updateData = { ...request.body };
         // Ne pas permettre la modification de l'auteur
         if (updateData.author) delete updateData.author;
+        if (updateData.room) delete updateData.room;
 
         const updatedTask = await Task.findByIdAndUpdate(id, updateData, {
           new: true,
