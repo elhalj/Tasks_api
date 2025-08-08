@@ -8,9 +8,9 @@ on:
 
 # Ajout des permissions nécessaires
 permissions:
-  contents: read|write
-  issues: read|write
-  pull-requests: read|write
+  contents: write
+  issues: write
+  pull-requests: write
 
 jobs:
   release:
