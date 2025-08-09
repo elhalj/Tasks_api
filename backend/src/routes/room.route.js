@@ -17,7 +17,6 @@ export const roomRoutes = async (fastify, options) => {
     async (request, reply) => {
       try {
         const userId = request.user.userId;
-
         // Récupérer à la fois les salles où l'utilisateur est admin et membre
         const [adminRooms, memberRooms] = await Promise.all([
           Room.find({ admin: userId, isActive: true })
@@ -318,6 +317,13 @@ export const roomRoutes = async (fastify, options) => {
         // Retirer l'utilisateur de la salle
         room.members.splice(memberIndex, 1);
 
+            error: ERROR_MESSAGES.CANNOT_REMOVE_ADMIN
+          });
+        }
+        
+        // Retirer l'utilisateur de la salle
+        room.members.splice(memberIndex, 1);
+        
         // Si c'est l'admin qui est retiré, désigner un nouvel admin ou supprimer la salle
         if (userId === room.admin.toString()) {
           if (room.members.length > 0) {
@@ -493,19 +499,16 @@ export const roomRoutes = async (fastify, options) => {
             error: ERROR_MESSAGES.NOT_ADMIN,
           });
         }
-
         // Supprimer toutes les tâches de la salle
         const tasksResult = await Task.deleteMany(
           { room: roomId },
           { session }
         );
-
         // Supprimer tous les commentaires liés à la salle
         const commentsResult = await Comment.deleteMany(
           { room: roomId },
           { session }
         );
-
         // Retirer la référence de la salle pour tous les membres
         await User.updateMany(
           { rooms: roomId },
@@ -549,7 +552,6 @@ export const roomRoutes = async (fastify, options) => {
 
       try {
         session.startTransaction();
-
         // Vérifier que le nouveau propriétaire existe
         const newAdmin = await User.findById(newAdminId).session(session);
         if (!newAdmin) {
@@ -641,7 +643,6 @@ export const roomRoutes = async (fastify, options) => {
     async (request, reply) => {
       const { roomId } = request.params;
       const currentUserId = request.user.userId;
-
       try {
         // Vérifier que la salle existe
         const room = await Room.findById(roomId);

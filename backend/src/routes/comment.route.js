@@ -365,7 +365,6 @@ export const commentRoutes = async (fastify, options) => {
 
       try {
         const comment = await Comment.findById(commentId);
-
         if (!comment) {
           return reply.code(404).send({
             success: false,
