@@ -190,7 +190,10 @@ export const taskRoutes = async (fastify, options) => {
           // Mettre à jour l'auteur avec la nouvelle tâche
           await User.findByIdAndUpdate(
             request.user.userId,
-            { $addToSet: { myTasks: savedTask._id } },
+            {
+              $addToSet: { myTasks: savedTask._id },
+              $inc: { "stats.tasksCreated": 1 },
+            },
             { session }
           );
 
@@ -290,21 +293,22 @@ export const taskRoutes = async (fastify, options) => {
             error: "Le titre de la tâche est invalide",
           });
         }
-        dueDate, estimatedHours;
 
         if (
           description &&
-          (typeof description !== "string" || description.trim === "")
+          (typeof description !== "string" || description.trim() === "")
         ) {
-          return reply
-            .code(400)
-            .send({ success: false, error: "la description est invalide" });
+          return reply.code(400).send({
+            success: false,
+            error: "La description est invalide",
+          });
         }
 
         if (dueDate && !(dueDate instanceof Date)) {
-          return reply
-            .code(400)
-            .send({ success: false, error: "L'échéance doit etre une date" });
+          return reply.code(400).send({
+            success: false,
+            error: "L'échéance doit etre une date",
+          });
         }
 
         if (dueDate && dueDate <= new Date()) {
@@ -337,6 +341,15 @@ export const taskRoutes = async (fastify, options) => {
             success: false,
             error: "Échec de la mise à jour de la tâche",
           });
+        }
+
+        const statusDone = updateData.status === "done";
+        if (statusDone) {
+          await User.findByIdAndUpdate(
+            userId,
+            { $inc: { "stats.tasksCompleted": 1 } },
+            { new: true }
+          );
         }
 
         //Détecter les changements siginficative

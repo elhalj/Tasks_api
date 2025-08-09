@@ -1,14 +1,127 @@
-# Documentation Complète - Tasks API
+# TaskFlow - Collaborative Task Management System
 
-![Fastify Logo](src/assets/fastify.png)
+![TaskFlow Logo](backend/src/assets/taskFlow.png)
 
-## 📋 Vue d'Ensemble du Projet
+## 🚀 Overview
 
-**Tasks API** est une application full-stack moderne de gestion de tâches qui combine une API RESTful robuste avec une interface utilisateur React intuitive. Le projet utilise des technologies de pointe pour offrir une expérience utilisateur fluide et sécurisée.
+TaskFlow is a full-stack task management application built with Fastify (Backend) and React (Frontend). It enables teams to collaborate on tasks, manage projects in rooms, and track progress in real-time.
 
-### 🎯 Objectifs du Projet
+## ✨ Key Features
 
-- Fournir une solution complète de gestion de tâches
+- **Task Management**: Create, assign, and track tasks with due dates and priorities
+- **Team Collaboration**: Work together in dedicated rooms with role-based access
+- **Real-time Updates**: Live updates using Socket.IO for seamless collaboration
+- **Comments & Threads**: Discuss tasks with threaded comments
+- **User Profiles**: Customizable profiles with activity tracking
+- **Notifications**: Stay updated with real-time notifications
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Fastify
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT
+- **Real-time**: Socket.IO
+- **Validation**: JSON Schema
+
+### Frontend
+- **Framework**: React
+- **State Management**: Context API
+- **UI Components**: Custom component library
+- **HTTP Client**: Axios
+- **Routing**: React Router
+
+## 📦 Installation
+
+### Prerequisites
+- Node.js (v14+)
+- MongoDB (v4.4+)
+- npm or yarn
+
+### Backend Setup
+
+```bash
+# Navigate to backend directory
+cd backend
+
+# Install dependencies
+npm install
+
+# Create .env file and add environment variables
+cp .env.example .env
+
+# Start development server
+npm run dev
+```
+
+### Frontend Setup
+
+```bash
+# Navigate to frontend directory
+cd ../frontend/tasks
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+```
+
+## 🔧 Environment Variables
+
+Create a `.env` file in the backend directory with the following variables:
+
+```
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRES_IN=7d
+NODE_ENV=development
+```
+
+## 📚 API Documentation
+
+### Authentication
+- `POST /api/v1/auth/register` - Register a new user
+- `POST /api/v1/auth/login` - User login
+- `GET /api/v1/auth/me` - Get current user profile
+
+### Tasks
+- `GET /api/v1/tasks` - Get all tasks
+- `POST /api/v1/tasks` - Create a new task
+- `GET /api/v1/tasks/:id` - Get task details
+- `PUT /api/v1/tasks/:id` - Update task
+- `DELETE /api/v1/tasks/:id` - Delete task
+
+### Rooms
+- `GET /api/v1/room/get/rooms` - Get all rooms
+- `POST /api/v1/room/add/rooms` - Create a new room
+- `PUT /api/v1/room/update/rooms/:roomId` - Update room
+- `DELETE /api/v1/room/delete/rooms/:roomId` - Delete room
+
+### Comments
+- `POST /api/v1/comment/add/comments` - Add comment
+- `PUT /api/v1/comment/update/comments/:commentId` - Update comment
+- `DELETE /api/v1/comment/delete/comments/:commentId` - Delete comment
+- `POST /api/v1/comment/reply/comments/:commentId/replies` - Reply to comment
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👏 Acknowledgments
+
+- Fastify Team
+- MongoDB
+- React Community
 - Permettre la collaboration entre utilisateurs
 - Offrir une API sécurisée et performante
 - Proposer une interface utilisateur moderne et responsive

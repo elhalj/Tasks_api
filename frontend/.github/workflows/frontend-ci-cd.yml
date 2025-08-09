@@ -1,0 +1,184 @@
+name: CI/CD Frontend
+
+on:
+  # D clenche lorsqu'on pousse sur main ou develop
+  push:
+    branches: [main, develop]
+    paths:
+      - "frontend/**"
+  # D clenche lorsqu'on cr e une Pull Request sur main ou develop
+  pull_request:
+    branches: [main, develop]
+  # D clenche lorsqu'on ex cute manuellement le workflow
+  workflow_dispatch:
+  # D clenche lorsqu'il y a une modification dans le pipeline backend
+  workflow_run:
+    workflows: ["Backend CI/CD Pipeline"]
+    types: [completed]
+    branches: [main, develop]
+
+env:
+  # Version de Node.js  utiliser
+  NODE_VERSION: "20"
+  # URL de l'API  utiliser en fonction de la branche
+  VITE_API_URL: ${{ github.ref_name == 'main' && 'https://api.taskflow.prod' || 'http://localhost:3000/api/v1' }}
+
+permissions:
+  # Permissions pour acc der aux contenus du r pertoire
+  contents: read
+  # Permissions pour cr er des d ploiements
+  deployments: write
+  # Permissions pour mettre  jour le statut du workflow
+  statuses: write
+
+jobs:
+  # Ex cute les tests sur le frontend
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: R cup rer le r pertoire
+        uses: actions/checkout@v4
+        with:
+          path: "full-repo"
+
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: "frontend/tasks/package-lock.json"
+
+      - name: Installer les d pendances
+        working-directory: frontend/tasks
+        run: npm ci
+
+      - name: Ex cuter les tests
+        working-directory: frontend/tasks
+        run: |
+          npm test -- --watchAll=false
+
+  # Ex cute la lint sur le frontend
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: R cup rer le r pertoire
+        uses: actions/checkout@v4
+        with:
+          path: "full-repo"
+
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Ex cuter ESLint
+        working-directory: frontend/tasks
+        run: |
+          npm run lint
+
+  # Compile le frontend
+  build:
+    name: Compilation
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    steps:
+      - name: R cup rer le r pertoire
+        uses: actions/checkout@v4
+        with:
+          path: "full-repo"
+
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: "frontend/tasks/package-lock.json"
+
+      - name: Installer les d pendances
+        working-directory: frontend/tasks
+        run: npm ci
+
+      - name: Compiler l'application
+        working-directory: frontend/tasks
+        env:
+          VITE_API_URL: ${{ env.VITE_API_URL }}
+        run: |
+          npm run build
+
+      - name: T l charger les artefacts de la compilation
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/tasks/dist
+          retention-days: 5
+
+  # D ploie le frontend sur staging
+  deploy-staging:
+    name: D ploiement sur Staging
+    needs: [build]
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: T l charger les artefacts de la compilation
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend-build
+
+      - name: D ploiement sur Staging
+        id: deploy
+        # Remplacez par vos commandes de d ploiement r elles pour staging
+        run: |
+          echo "D ploiement du frontend sur staging..."
+          # Exemple: scp -r frontend-build/* user@staging-server:/var/www/taskflow-staging/
+          echo "url=https://staging.taskflow.app" >> $GITHUB_OUTPUT
+
+  # D ploie le frontend sur production
+  deploy-production:
+    name: D ploiement sur Production
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: T l charger les artefacts de la compilation
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend-build
+
+      - name: D ploiement sur Production
+        id: deploy
+        # Remplacez par vos commandes de d ploiement r elles pour production
+        run: |
+          echo "D ploiement du frontend sur production..."
+          # Exemple: scp -r frontend-build/* user@production-server:/var/www/taskflow/
+          # Consid rez utiliser une strat gie de d ploiement bleue-verte
+          echo "url=https://taskflow.app" >> $GITHUB_OUTPUT
+
+  # Notifie le statut de la d ploiement
+  notify:
+    name: Notification du statut
+    needs: [deploy-production, deploy-staging]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: V rifier le statut de la d ploiement
+        if: contains(needs.*.result, 'failure')
+        run: |
+          echo "Une ou plusieurs d ploiements ont  chou "
+          exit 1
+      - name: Succ s de la d ploiement
+        if: success()
+        run: |
+          echo "Toutes les d ploiements ont r ussi"
