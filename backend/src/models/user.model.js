@@ -156,7 +156,7 @@ userSchema.pre("save", async function (next) {
 });
 
 // Méthode pour vérifier si le mot de passe correspond
-userSchema.methods.comparePassword = async function (candidatePassword) {
+userSchema.methods.isPasswordCorrect = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 

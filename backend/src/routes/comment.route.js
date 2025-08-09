@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
-import { isValidObjectId } from "../helpers/validateId";
-import Comment from "../models/comment.model";
-import Task from "../models/tasks.model";
-import Room from "../models/room.model";
-import User from "../models/user.model";
+import { isValidObjectId } from "../helpers/validateId.js";
+import Comment from "../models/comment.model.js";
+import Task from "../models/tasks.model.js";
+import Room from "../models/room.model.js";
+import User from "../models/user.model.js";
 
 export const commentRoutes = async (fastify, options) => {
   // Ajouter un commentaire
   fastify.post(
-    "/comments",
+    "/add/comments",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
       const { content, taskId, roomId } = request.body;
@@ -18,7 +18,8 @@ export const commentRoutes = async (fastify, options) => {
       if (!content || typeof content !== "string" || content.trim() === "") {
         return reply.code(400).send({
           success: false,
-          error: "Le contenu du commentaire est requis et doit être une chaîne de caractères valide",
+          error:
+            "Le contenu du commentaire est requis et doit être une chaîne de caractères valide",
         });
       }
 
@@ -85,7 +86,7 @@ export const commentRoutes = async (fastify, options) => {
         // Mise à jour des statistiques de l'utilisateur
         await User.findByIdAndUpdate(
           userId,
-          { $inc: { 'stats.commentsPosted': 1 } },
+          { $inc: { "stats.commentsPosted": 1 } },
           { session, new: true }
         );
 
@@ -94,9 +95,8 @@ export const commentRoutes = async (fastify, options) => {
 
         return {
           success: true,
-          comment: await comment.populate('author', 'userName email')
+          comment: await comment.populate("author", "userName email"),
         };
-
       } catch (error) {
         await session?.abortTransaction();
         session?.endSession();
@@ -111,7 +111,7 @@ export const commentRoutes = async (fastify, options) => {
 
   // Mettre à jour un commentaire
   fastify.put(
-    "/comments/:commentId",
+    "/update/comments/:commentId",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
       const { commentId } = request.params;
@@ -135,10 +135,10 @@ export const commentRoutes = async (fastify, options) => {
       try {
         const comment = await Comment.findOneAndUpdate(
           { _id: commentId, author: userId },
-          { 
+          {
             content: content.trim(),
             isEdited: true,
-            editedAt: new Date()
+            editedAt: new Date(),
           },
           { new: true, runValidators: true }
         );
@@ -146,20 +146,21 @@ export const commentRoutes = async (fastify, options) => {
         if (!comment) {
           return reply.code(404).send({
             success: false,
-            error: "Commentaire non trouvé ou vous n'êtes pas autorisé à le modifier",
+            error:
+              "Commentaire non trouvé ou vous n'êtes pas autorisé à le modifier",
           });
         }
 
         return {
           success: true,
-          comment: await comment.populate('author', 'userName email')
+          comment: await comment.populate("author", "userName email"),
         };
-
       } catch (error) {
         console.error("Erreur lors de la mise à jour du commentaire:", error);
         return reply.code(500).send({
           success: false,
-          error: "Une erreur est survenue lors de la mise à jour du commentaire",
+          error:
+            "Une erreur est survenue lors de la mise à jour du commentaire",
         });
       }
     }
@@ -167,7 +168,7 @@ export const commentRoutes = async (fastify, options) => {
 
   // Supprimer un commentaire
   fastify.delete(
-    "/comments/:commentId",
+    "/delete/comments/:commentId",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
       const { commentId } = request.params;
@@ -195,7 +196,8 @@ export const commentRoutes = async (fastify, options) => {
           session.endSession();
           return reply.code(404).send({
             success: false,
-            error: "Commentaire non trouvé ou vous n'êtes pas autorisé à le supprimer",
+            error:
+              "Commentaire non trouvé ou vous n'êtes pas autorisé à le supprimer",
           });
         }
 
@@ -218,14 +220,14 @@ export const commentRoutes = async (fastify, options) => {
         session.endSession();
 
         return { success: true, message: "Commentaire supprimé avec succès" };
-
       } catch (error) {
         await session.abortTransaction();
         session.endSession();
         console.error("Erreur lors de la suppression du commentaire:", error);
         return reply.code(500).send({
           success: false,
-          error: "Une erreur est survenue lors de la suppression du commentaire",
+          error:
+            "Une erreur est survenue lors de la suppression du commentaire",
         });
       }
     }
@@ -233,7 +235,7 @@ export const commentRoutes = async (fastify, options) => {
 
   // Ajouter une réponse à un commentaire
   fastify.post(
-    "/comments/:commentId/replies",
+    "/reply/comments/:commentId/replies",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
       const { commentId } = request.params;
@@ -266,7 +268,7 @@ export const commentRoutes = async (fastify, options) => {
             },
           },
           { new: true, runValidators: true }
-        ).populate('replies.author', 'userName email');
+        ).populate("replies.author", "userName email");
 
         if (!comment) {
           return reply.code(404).send({
@@ -279,7 +281,6 @@ export const commentRoutes = async (fastify, options) => {
           success: true,
           reply: comment.replies[comment.replies.length - 1],
         };
-
       } catch (error) {
         console.error("Erreur lors de l'ajout de la réponse:", error);
         return reply.code(500).send({
@@ -292,7 +293,7 @@ export const commentRoutes = async (fastify, options) => {
 
   // Récupérer les commentaires d'une tâche ou d'une salle
   fastify.get(
-    "/comments",
+    "/get/comments",
     { preHandler: fastify.authenticate },
     async (request, reply) => {
       const { taskId, roomId, page = 1, limit = 10 } = request.query;
@@ -314,15 +315,15 @@ export const commentRoutes = async (fastify, options) => {
           limit: parseInt(limit),
           sort: { createdAt: -1 },
           populate: [
-            { path: 'author', select: 'userName email profile.avatar' },
-            { path: 'replies.author', select: 'userName email profile.avatar' }
-          ]
+            { path: "author", select: "userName email profile.avatar" },
+            { path: "replies.author", select: "userName email profile.avatar" },
+          ],
         };
 
         const comments = await Comment.paginate(query, options);
 
-        return { 
-          success: true, 
+        return {
+          success: true,
           comments: comments.docs,
           pagination: {
             total: comments.totalDocs,
@@ -330,15 +331,18 @@ export const commentRoutes = async (fastify, options) => {
             page: comments.page,
             limit: comments.limit,
             hasNext: comments.hasNextPage,
-            hasPrev: comments.hasPrevPage
-          }
+            hasPrev: comments.hasPrevPage,
+          },
         };
-
       } catch (error) {
-        console.error("Erreur lors de la récupération des commentaires:", error);
+        console.error(
+          "Erreur lors de la récupération des commentaires:",
+          error
+        );
         return reply.code(500).send({
           success: false,
-          error: "Une erreur est survenue lors de la récupération des commentaires",
+          error:
+            "Une erreur est survenue lors de la récupération des commentaires",
         });
       }
     }
@@ -361,7 +365,7 @@ export const commentRoutes = async (fastify, options) => {
 
       try {
         const comment = await Comment.findById(commentId);
-        
+
         if (!comment) {
           return reply.code(404).send({
             success: false,
@@ -393,7 +397,6 @@ export const commentRoutes = async (fastify, options) => {
           hasLiked: !hasLiked,
           likesCount: updatedComment.likes.length,
         };
-
       } catch (error) {
         console.error("Erreur lors de la mise à jour du like:", error);
         return reply.code(500).send({
