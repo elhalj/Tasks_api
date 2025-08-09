@@ -11,7 +11,7 @@ env:
   NODE_VERSION: "20"
   MONGODB_VERSION: "6.0"
   MONGODB_DATABASE: "taskflow_test"
-  FRONTEND_DIR: "../frontend/tasks"
+  FRONTEND_DIR: "/frontend/tasks"
 
 permissions:
   contents: read
