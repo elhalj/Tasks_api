@@ -1,0 +1,173 @@
+name: Pipeline d'intégration et de déploiement du backend
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+  MONGODB_VERSION: "6.0"
+  MONGODB_DATABASE: "taskflow_test"
+  FRONTEND_DIR: "/frontend/tasks"
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  packages: write
+  statuses: write
+
+jobs:
+  test:
+    name: Exécution des tests
+    runs-on: ubuntu-latest
+    env:
+      MONGODB_VERSION: "6.0"
+      MONGODB_DATABASE: "taskflow_test"
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_DATABASE: taskflow_test
+        options: >-
+          --health-cmd "mongosh --eval 'db.serverStatus().ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Exécution des tests
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://localhost:27017/${{ env.MONGODB_DATABASE }}
+          JWT_SECRET: test-secret
+        run: |
+          npm test -- --coverage
+
+  lint:
+    name: Linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Linter
+        run: npx eslint "**/*.js"
+
+  deploy-staging:
+    name: Déploiement en staging
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Installation des dépendances
+        run: npm ci --omit=dev
+
+      - name: Déploiement en staging
+        id: deploy
+        env:
+          NODE_ENV: staging
+          MONGODB_URI: ${{ secrets.STAGING_MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.STAGING_JWT_SECRET }}
+        run: |
+          # Commandes de déploiement en staging
+          echo "Déploiement en staging..."
+
+  release:
+    name: Publication d'une nouvelle version
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Publication d'une nouvelle version
+        id: semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
+
+  deploy-production:
+    name: Déploiement en production
+    needs: [release]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Installation des dépendances
+        run: npm ci --omit=dev
+
+      - name: Déploiement en production
+        id: deploy
+        env:
+          NODE_ENV: production
+          MONGODB_URI: ${{ secrets.PROD_MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.PROD_JWT_SECRET }}
+        run: |
+          # Commandes de déploiement en production
+          echo "Déploiement en production..."
