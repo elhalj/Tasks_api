@@ -5,6 +5,8 @@ interface TaskProps {
   title: string;
   description: string;
   completed: boolean;
+  dueDate: string;
+  estimatedHours: number;
   status: string;
   priority: string;
   progress: number
@@ -18,6 +20,8 @@ const CreateTask = () => {
   const [myTask, setMyTask] = useState<TaskProps>({
     title: "",
     description: "",
+    dueDate: "2025-08-15",
+    estimatedHours: 14,
     completed: false,
     status: "pending",
     priority: "low",
@@ -49,9 +53,9 @@ const CreateTask = () => {
     setLoading(true);
     try {
       
-      await addTask(myTask.title, myTask.description, myTask.completed, myTask.status, myTask.priority, myTask.progress);
+      await addTask(myTask.title, myTask.description,myTask.dueDate, myTask.estimatedHours, myTask.completed, myTask.status, myTask.priority, myTask.progress);
       // toast.success("Ajouté avec succès");
-      setMyTask({ title: "", description: "", completed: false , status:"", priority:"", progress:0});
+      setMyTask({ title: "", description: "",dueDate:"2025-08-15", estimatedHours:14, completed: false , status:"", priority:"", progress:0});
     } catch (error) {
       console.error(error);
     } finally {
@@ -80,6 +84,26 @@ const CreateTask = () => {
             name="description"
             placeholder="Entrez une description"
             className="p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </label>
+        <label className="flex flex-col">
+          <span className="text-lg font-bold">Date de fin</span>
+          <input
+            type="date"
+            value={myTask.dueDate}
+            onChange={handleInputChange}
+            name="dueDate"
+            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </label>
+        <label className="flex flex-col">
+          <span className="text-lg font-bold">Estimation (h)</span>
+          <input
+            type="number"
+            value={myTask.estimatedHours}
+            onChange={handleInputChange}
+            name="estimatedHours"
+            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
         <label className="flex gap-1 items-center">
