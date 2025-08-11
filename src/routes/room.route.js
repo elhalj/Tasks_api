@@ -316,13 +316,6 @@ export const roomRoutes = async (fastify, options) => {
 
         // Retirer l'utilisateur de la salle
         room.members.splice(memberIndex, 1);
-
-            error: ERROR_MESSAGES.CANNOT_REMOVE_ADMIN
-          });
-        }
-        
-        // Retirer l'utilisateur de la salle
-        room.members.splice(memberIndex, 1);
         
         // Si c'est l'admin qui est retiré, désigner un nouvel admin ou supprimer la salle
         if (userId === room.admin.toString()) {
@@ -378,7 +371,7 @@ export const roomRoutes = async (fastify, options) => {
         session.endSession();
         return handleError(error, reply);
       }
-    }
+    },
   );
 
   // Update room information

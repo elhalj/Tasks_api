@@ -77,41 +77,41 @@ export const taskRoutes = async (fastify, options) => {
           description,
           dueDate,
           estimatedHours,
-          assignees,
-          roomId,
+          // assignees,
+          // roomId,
           priority = "low",
           status = "pending",
         } = request.body;
 
         // Valider que les utilisateurs assignés existent
-        if (assignees && assignees.length > 0) {
-          const existingUsers = await User.find({ _id: { $in: assignees } });
-          if (existingUsers.length !== assignees.length) {
-            return reply.code(400).send({
-              success: false,
-              error: "Un ou plusieurs utilisateurs assignés n'existent pas",
-            });
-          }
-        }
+        // if (assignees && assignees.length > 0) {
+        //   const existingUsers = await User.find({ _id: { $in: assignees } });
+        //   if (existingUsers.length !== assignees.length) {
+        //     return reply.code(400).send({
+        //       success: false,
+        //       error: "Un ou plusieurs utilisateurs assignés n'existent pas",
+        //     });
+        //   }
+        // }
 
         // Vérifier que la salle existe et que l'utilisateur y a accès
-        let room = null;
-        if (roomId) {
-          room = await Room.findOne({
-            _id: roomId,
-            $or: [
-              { admin: request.user.userId },
-              { members: request.user.userId },
-            ],
-          });
+        // let room = null;
+        // if (roomId) {
+        //   room = await Room.findOne({
+        //     _id: roomId,
+        //     $or: [
+        //       { admin: request.user.userId },
+        //       { members: request.user.userId },
+        //     ],
+        //   });
 
-          if (!room) {
-            return reply.code(403).send({
-              success: false,
-              error: "Salle non trouvée ou accès non autorisé",
-            });
-          }
-        }
+        //   if (!room) {
+        //     return reply.code(403).send({
+        //       success: false,
+        //       error: "Salle non trouvée ou accès non autorisé",
+        //     });
+        //   }
+        // }
 
         if (!title || typeof title !== "string" || title.trim() === "") {
           return reply.code(400).send({
@@ -158,12 +158,12 @@ export const taskRoutes = async (fastify, options) => {
           });
         }
 
-        if (!assignees || assignees.length === 0) {
-          return reply.code(400).send({
-            success: false,
-            error: "Vous devez assigner au moins une personne",
-          });
-        }
+        // if (!assignees || assignees.length === 0) {
+        //   return reply.code(400).send({
+        //     success: false,
+        //     error: "Vous devez assigner au moins une personne",
+        //   });
+        // }
 
         // Créer la tâche avec les données validées
         const taskData = {
@@ -173,10 +173,10 @@ export const taskRoutes = async (fastify, options) => {
           priority,
           dueDate: dueDateObj,
           estimatedHours: parseFloat(estimatedHours) || 0,
-          assignees,
+          // assignees,
           author: request.user.userId,
           startDate: new Date(),
-          room: roomId,
+          // room: roomId,
         };
 
         const task = new Task(taskData);
@@ -198,20 +198,20 @@ export const taskRoutes = async (fastify, options) => {
           );
 
           // Mettre à jour les utilisateurs assignés
-          await User.updateMany(
-            { _id: { $in: assignees } },
-            { $addToSet: { collaborators: savedTask._id } },
-            { session }
-          );
+          // await User.updateMany(
+          //   { _id: { $in: assignees } },
+          //   { $addToSet: { collaborators: savedTask._id } },
+          //   { session }
+          // );
 
           // Mettre à jour la salle avec la nouvelle tâche si nécessaire
-          if (roomId) {
-            await Room.findByIdAndUpdate(
-              roomId,
-              { $addToSet: { tasks: savedTask._id } },
-              { session }
-            );
-          }
+          // if (roomId) {
+          //   await Room.findByIdAndUpdate(
+          //     roomId,
+          //     { $addToSet: { tasks: savedTask._id } },
+          //     { session }
+          //   );
+          // }
 
           await session.commitTransaction();
           session.endSession();
@@ -225,19 +225,19 @@ export const taskRoutes = async (fastify, options) => {
           });
 
           // Notifier les utilisateurs assignés
-          assignees.forEach((userId) => {
-            if (userId.toString() !== request.user.userId.toString()) {
-              emitTaskNotification(
-                "taskAssigned",
-                {
-                  task: savedTask,
-                  message: `Vous avez été assigné à la tâche: ${savedTask.title}`,
-                  type: "info",
-                },
-                userId
-              );
-            }
-          });
+          // assignees.forEach((userId) => {
+          //   if (userId.toString() !== request.user.userId.toString()) {
+          //     emitTaskNotification(
+          //       "taskAssigned",
+          //       {
+          //         task: savedTask,
+          //         message: `Vous avez été assigné à la tâche: ${savedTask.title}`,
+          //         type: "info",
+          //       },
+          //       userId
+          //     );
+          //   }
+          // });
 
           return savedTask;
         } catch (error) {
@@ -249,7 +249,7 @@ export const taskRoutes = async (fastify, options) => {
         console.error("Erreur lors de la création de la tâche:", error);
         reply.code(500).send({
           success: false,
-          error: "Une erreur est survenue lors de la création de la tâche",
+          error: `Une erreur est survenue lors de la création de la tâche: ${error.message}`,
           details:
             process.env.NODE_ENV === "development" ? error.message : undefined,
         });

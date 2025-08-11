@@ -7,10 +7,12 @@ interface TaskProps {
   _id?: string;
   title: string;
   description: string;
+  dueDate: string;
+  estimatedHours?: number;
   completed?: boolean;
   status?: string;
   priority?: string;
-  progress?: number
+  progress?: number;
 }
 
 // Composant pour mettre à jour une tâche
@@ -23,6 +25,8 @@ const UpdateTask = () => {
   const [task, setTask] = useState<TaskProps>({
     title: myTask?.title || "",
     description: myTask?.description || "",
+    dueDate: myTask?.dueDate || new Date().toISOString().split('T')[0], // Default to today's date
+    estimatedHours: myTask?.estimatedHours || 1, // Default to 1 hour
     completed: myTask?.completed || false,
     status: myTask?.status || "pending",
     priority: myTask?.priority || "low",

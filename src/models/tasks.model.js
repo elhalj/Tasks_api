@@ -14,6 +14,7 @@ const taskSchema = new mongoose.Schema(
       trim: true,
       maxlength: [2000, "La description ne peut pas dépasser 2000 caractères"],
     },
+    completed: { type: Boolean, default: false },
     status: {
       type: String,
       enum: ["pending", "in_progress", "done", "canceled"],
@@ -69,6 +70,7 @@ const taskSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+        default: [],
       },
     ],
     author: {
@@ -116,7 +118,7 @@ const taskSchema = new mongoose.Schema(
     ],
     // Les commentaires sont maintenant gérés via le modèle Comment
     // avec une référence bidirectionnelle
-    comments: { type: mongoose.Schema.Types.ObjectId, ref: "Comment" },
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
   },
   {
     timestamps: true,
