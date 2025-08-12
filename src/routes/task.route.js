@@ -304,18 +304,24 @@ export const taskRoutes = async (fastify, options) => {
           });
         }
 
-        if (dueDate && !(dueDate instanceof Date)) {
-          return reply.code(400).send({
-            success: false,
-            error: "L'échéance doit etre une date",
-          });
-        }
+        // Convertir la date si elle est fournie comme chaîne
+        let dueDateObj;
+        if (dueDate) {
+          dueDateObj = new Date(dueDate);
+          if (isNaN(dueDateObj.getTime())) {
+            return reply.code(400).send({
+              success: false,
+              error: "Format de date d'échéance invalide",
+            });
+          }
 
-        if (dueDate && dueDate <= new Date()) {
-          return reply.code(400).send({
-            success: false,
-            error: "L'échéance doit etre une date future",
-          });
+          // Vérifier que la date est dans le futur
+          if (dueDateObj <= new Date()) {
+            return reply.code(400).send({
+              success: false,
+              error: "La date d'échéance doit être une date future",
+            });
+          }
         }
 
         if (estimatedHours && typeof estimatedHours !== "number") {

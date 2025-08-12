@@ -1,179 +1,240 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { TaskContext } from "../context";
 
-// Types pour la tâche
 interface TaskProps {
   _id?: string;
   title: string;
   description: string;
+  completed: boolean;
   dueDate: string;
-  estimatedHours?: number;
-  completed?: boolean;
-  status?: string;
-  priority?: string;
-  progress?: number;
+  estimatedHours: number;
+  status: string;
+  priority: string;
+  progress: number;
 }
 
-// Composant pour mettre à jour une tâche
+const statusTable = ["pending", "in_progress", "done", "canceled"];
+const priorityTable = ["low", "medium", "high", "critical"];
+
 const UpdateTask = () => {
-  const { tasks, updateTask } = useContext(TaskContext); // On récupère les tâches et la fonction pour les mettre à jour
-  const { id } = useParams<{ id: string }>(); // On récupère l'ID de la tâche à mettre à jour
-  const myTask = tasks.find((t) => t._id === id); // On cherche la tâche correspondante dans la liste des tâches
-
-  // On définit l'état de la tâche à mettre à jour
+  const { tasks, updateTask } = useContext(TaskContext);
+  const { id } = useParams<{ id: string }>();
+  const myTask = tasks.find((t) => t._id === id);
+  
   const [task, setTask] = useState<TaskProps>({
-    title: myTask?.title || "",
-    description: myTask?.description || "",
-    dueDate: myTask?.dueDate || new Date().toISOString().split('T')[0], // Default to today's date
-    estimatedHours: myTask?.estimatedHours || 1, // Default to 1 hour
-    completed: myTask?.completed || false,
-    status: myTask?.status || "pending",
-    priority: myTask?.priority || "low",
-    progress: myTask?.progress || 0
+    title: "",
+    description: "",
+    dueDate: new Date().toISOString().split('T')[0],
+    estimatedHours: 1,
+    completed: false,
+    status: "pending",
+    priority: "low",
+    progress: 0
   });
+  
+  const [loading, setLoading] = useState(false);
 
-  // On met à jour l'état de la tâche si elle change dans la liste des tâches
   useEffect(() => {
     if (myTask) {
-      setTask(myTask);
+      setTask({
+        title: myTask.title,
+        description: myTask.description,
+        dueDate: myTask.dueDate.split('T')[0],
+        estimatedHours: myTask.estimatedHours || 1,
+        completed: myTask.completed || false,
+        status: myTask.status || "pending",
+        priority: myTask.priority || "low",
+        progress: myTask.progress || 0
+      });
     }
   }, [myTask]);
 
-  // Fonction pour gérer les changements de valeur des champs
-  const handleChange = (
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
-      | React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const { name, value, type } = e.target;
-    const newValue =
-      type === "checkbox"
-        ? (e.target as HTMLInputElement).checked
-        : type === "select-one"
-        ? (e.target as HTMLSelectElement).value
-        : value;
-
-    setTask((prevTask) => ({
-      ...prevTask,
-      [name]: newValue,
-    }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    if (type === "checkbox") {
+      setTask((prev) => ({ ...prev, [name]: checked }));
+    } else {
+      setTask((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  // Fonction pour gérer la soumission du formulaire
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setTask((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setTask((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!id) {
-      console.error("ID de la tâche non défini");
+      console.error("Task ID is not defined");
       return;
     }
+    
+    setLoading(true);
     try {
       await updateTask(id, task);
+      // Optionally add a success message or redirect
     } catch (error) {
-      console.error(error);
+      console.error("Error updating task:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (!myTask) {
+    return <div className="p-4">Tâche non trouvée</div>;
+  }
+
   return (
-    <>
-      {/* Formulaire pour mettre à jour la tâche */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gray-100 p-4 rounded-md flex flex-col gap-4 w-[600px]"
-      >
-      <p>
+    <div className="p-4 bg-white rounded-lg">
+      <div className="mb-4">
         <Link
           to="/dashboard"
-          className="text-blue-500 hover:underline bg-blue-200 p-1 rounded-md"
+          className="text-blue-500 hover:underline bg-blue-100 px-3 py-1 rounded-md text-sm font-medium"
         >
-          Retourner au dashboard
+          ← Retour au tableau de bord
         </Link>
-      </p>
-        {/* Champ pour le titre */}
+      </div>
+      
+      <h1 className="text-2xl font-bold mb-6">Modifier la tâche</h1>
+      
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-2xl">
         <label className="flex flex-col">
-          Titre:
+          <span className="text-lg font-bold">Titre</span>
           <input
             type="text"
             name="title"
             value={task.title}
-            onChange={handleChange}
-            className="border border-gray-300 rounded p-2"
+            onChange={handleInputChange}
+            placeholder="Entrez un titre"
+            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
         </label>
-        {/* Champ pour la description */}
+        
         <label className="flex flex-col">
-          Description:
+          <span className="text-lg font-bold">Description</span>
           <textarea
             name="description"
             value={task.description}
-            onChange={handleChange}
-            className="border border-gray-300 rounded p-2"
+            onChange={handleTextAreaChange}
+            placeholder="Entrez une description"
+            className="p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
           />
         </label>
-        {/* Champ pour l'état de la tâche */}
-        <label className="flex items-center">
-          Complétée:
-          <input
-            type="checkbox"
-            name="completed"
-            checked={task.completed}
-            onChange={handleChange}
-            className="ml-2"
-          />
-        </label>
-        {/* Select pour le statut */}
-        <label className="flex flex-col">
-          Statut:
-          <select
-            name="status"
-            value={task.status}
-            onChange={handleChange}
-            className="border border-gray-300 rounded p-2"
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="flex flex-col">
+            <span className="text-lg font-bold">Date de fin</span>
+            <input
+              type="date"
+              name="dueDate"
+              value={task.dueDate}
+              onChange={handleInputChange}
+              className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </label>
+          
+          <label className="flex flex-col">
+            <span className="text-lg font-bold">Estimation (h)</span>
+            <input
+              type="number"
+              name="estimatedHours"
+              value={task.estimatedHours}
+              onChange={handleInputChange}
+              min="0.5"
+              step="0.5"
+              className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </label>
+          
+          <label className="flex flex-col">
+            <span className="text-lg font-bold">Statut</span>
+            <select
+              name="status"
+              value={task.status}
+              onChange={handleSelectChange}
+              className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {statusTable.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </label>
+          
+          <label className="flex flex-col">
+            <span className="text-lg font-bold">Priorité</span>
+            <select
+              name="priority"
+              value={task.priority}
+              onChange={handleSelectChange}
+              className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {priorityTable.map((priority) => (
+                <option key={priority} value={priority}>
+                  {priority}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg">
+            <span className="text-lg font-bold">Terminée</span>
+            <input
+              type="checkbox"
+              name="completed"
+              checked={task.completed}
+              onChange={handleInputChange}
+              className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+          </label>
+          
+          <label className="flex flex-col">
+            <span className="text-lg font-bold">Progression ({task.progress}%)</span>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                name="progress"
+                min="0"
+                max="100"
+                value={task.progress}
+                onChange={handleInputChange}
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="w-12 text-center">{task.progress}%</span>
+            </div>
+          </label>
+        </div>
+        
+        <div className="flex justify-end gap-3 mt-4">
+          <Link
+            to="/dashboard"
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <option value="pending">pending</option>
-            <option value="in_progress">in_progress</option>
-            <option value="done">done</option>
-            <option value="canceled">canceled</option>
-          </select>
-        </label>
-        {/* Select pour la priorité */}
-        <label className="flex flex-col">
-          Priorité:
-          <select
-            name="priority"
-            value={task.priority}
-            onChange={handleChange}
-            className="border border-gray-300 rounded p-2"
+            Annuler
+          </Link>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <option value="low">low</option>
-            <option value="medium">medium</option>
-            <option value="high">high</option>
-            <option value="critical">critical</option>
-          </select>
-        </label>
-        {/* Champ pour la progression */}
-        <label className="flex flex-col">
-          Progression:
-          <input
-            type="number"
-            name="progress"
-            value={task.progress}
-            onChange={handleChange}
-            min={0}
-            max={100}
-            className="border border-gray-300 rounded p-2"
-          />
-        </label>
-        {/* Bouton pour soumettre le formulaire */}
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Mettre à jour
-        </button>
+            {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+          </button>
+        </div>
       </form>
-    </>
+      </div>
   );
 };
 
