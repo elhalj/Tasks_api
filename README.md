@@ -1,6 +1,6 @@
 # TaskFlow - Collaborative Task Management System
 
-![TaskFlow Logo](backend/src/assets/taskFlow.png)
+![TaskFlow Logo](src/assets/taskFlow.png)
 
 ## 🚀 Overview
 
@@ -18,6 +18,7 @@ TaskFlow is a full-stack task management application built with Fastify (Backend
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **Runtime**: Node.js
 - **Framework**: Fastify
 - **Database**: MongoDB with Mongoose
@@ -26,6 +27,7 @@ TaskFlow is a full-stack task management application built with Fastify (Backend
 - **Validation**: JSON Schema
 
 ### Frontend
+
 - **Framework**: React
 - **State Management**: Context API
 - **UI Components**: Custom component library
@@ -35,6 +37,7 @@ TaskFlow is a full-stack task management application built with Fastify (Backend
 ## 📦 Installation
 
 ### Prerequisites
+
 - Node.js (v14+)
 - MongoDB (v4.4+)
 - npm or yarn
@@ -82,11 +85,13 @@ NODE_ENV=development
 ## 📚 API Documentation
 
 ### Authentication
+
 - `POST /api/v1/auth/register` - Register a new user
 - `POST /api/v1/auth/login` - User login
 - `GET /api/v1/auth/me` - Get current user profile
 
 ### Tasks
+
 - `GET /api/v1/tasks` - Get all tasks
 - `POST /api/v1/tasks` - Create a new task
 - `GET /api/v1/tasks/:id` - Get task details
@@ -94,12 +99,14 @@ NODE_ENV=development
 - `DELETE /api/v1/tasks/:id` - Delete task
 
 ### Rooms
+
 - `GET /api/v1/room/get/rooms` - Get all rooms
 - `POST /api/v1/room/add/rooms` - Create a new room
 - `PUT /api/v1/room/update/rooms/:roomId` - Update room
 - `DELETE /api/v1/room/delete/rooms/:roomId` - Delete room
 
 ### Comments
+
 - `POST /api/v1/comment/add/comments` - Add comment
 - `PUT /api/v1/comment/update/comments/:commentId` - Update comment
 - `DELETE /api/v1/comment/delete/comments/:commentId` - Delete comment

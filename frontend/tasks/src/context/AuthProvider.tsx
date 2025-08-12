@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             } else {
                 // Si pas de token, on supprime l'entête par défaut
                 delete instance.defaults.headers.common['Authorization'];
+                window.location.href = "/login"
             }
         } catch (error) {
             console.error("Erreur lors de la mise en place de l'entête de requête:", error);
