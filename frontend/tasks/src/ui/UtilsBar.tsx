@@ -26,6 +26,14 @@ const UtilsBar = ({
           <Plus className="w-4 h-4" />
           <Link to="/dashboard/add/task">Ajouter une tache</Link>
         </button>
+        {/* Bouton pour ajouter une room */}
+        <button
+          type="button"
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+        >
+          <Plus className="w-4 h-4" />
+          <Link to="/dashboard/add/room">Ajouter une une room</Link>
+        </button>
       </div>
 
       {/* Barre d'outils */}

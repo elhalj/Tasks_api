@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import AddTask from "./pages/AddPage";
 import UpdatePage from "./pages/UpdatePage";
 import LandingPage from "./pages/LandingPage";
+import AddRoomPage from "./pages/AddRoomPage";
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/add/task" element={<AddTask />} />
         <Route path="/dashboard/tasks/:id/edit" element={<UpdatePage />} />
+        <Route path="/dashboard/add/room" element={ <AddRoomPage/>} />
       </Routes>
       <Toaster position="top-right" reverseOrder={false} />
     </>
