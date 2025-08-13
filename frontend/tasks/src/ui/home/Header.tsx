@@ -30,7 +30,7 @@ const Header = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsMenuO
               <a href="#temoignages" className="text-gray-700 hover:text-blue-600 transition-colors">Témoignages</a>
               <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
                           <a href="/login" className="text-gray-700 hover:text-blue-600 transition-colors">Se connecter</a>
-                          <div>{ user && (<div><button type="button"><Link to="dashboard">Dashboard</Link></button></div>)}</div>
+                          <div>{ user ? (<div><button type="button"><Link to="dashboard">Dashboard</Link></button></div>) : ""}</div>
             </nav>
 
             {/* CTA et Menu Mobile */}
@@ -63,7 +63,7 @@ const Header = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsMenuO
               </div>
             </div>
                   )}
-                  <div>{ user && (<div><button type="button"><Link to="dashboard">Dashboard</Link></button></div>)}</div>
+                  <div>{ user ? (<div><button type="button"><Link to="dashboard">Dashboard</Link></button></div>) : ""}</div>
         </div>
       </header>
     </div>

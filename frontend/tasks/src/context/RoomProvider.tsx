@@ -1,10 +1,9 @@
-import { useContext, useState, useEffect, useCallback } from "react"
-import { AuthContext } from "./AuthContext"
-import type { Room } from "../types/room"
-import instance, { CancelTokenSource } from "../services/api"
-import type { User } from "../types/user"
-import { FileWarning, Loader } from "lucide-react"
-import { RoomContext } from "./RoomContext"
+import {  useState, useEffect, useCallback } from "react";
+// import { AuthContext } from "./AuthContext";
+import type { Room } from "../types/room";
+import instance from "../services/api";
+import type { User } from "../types/user";
+import { RoomContext } from "./RoomContext";
 
 interface RoomResponse {
   success: boolean;
@@ -15,7 +14,7 @@ interface RoomResponse {
 }
 
 interface RoomProviderProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 type ApiError = Error & {
@@ -28,249 +27,242 @@ type ApiError = Error & {
 };
 
 export const RoomProvider = ({ children }: RoomProviderProps) => {
-    const { user } = useContext(AuthContext);
-    const [room, setRoom] = useState<Room[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [errors, setErrors] = useState<string | null>(null);
-    const [cancelTokenSource, setCancelTokenSource] = useState<CancelTokenSource | null>(null);
+//   const { user } = useContext(AuthContext);
+  const [room, setRoom] = useState<Room[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [errors, setErrors] = useState<string | null>(null);
 
-    const getRoom = useCallback(async (signal?: AbortSignal) => {
-        try {
-            setLoading(true);
-            setErrors(null);
-            
-            const source = instance.CancelToken.source();
-            setCancelTokenSource(source);
-            
-            const res = await instance.get<RoomResponse>("/room/get/rooms", {
-                cancelToken: source.token,
-                signal
-            });
-            
-            const { adminRooms = [], memberRooms = [] } = res.data;
-            setRoom([...adminRooms, ...memberRooms]);
-        } catch (error) {
-            const apiError = error as ApiError;
-            if (!instance.isCancel(error)) {
-                const errorMessage = apiError.response?.data?.error || 
-                                  apiError.response?.data?.message || 
-                                  apiError.message || 
-                                  'Failed to fetch rooms';
-                setErrors(`Error: ${errorMessage}`);
-                console.error("Error fetching rooms:", error);
-            }
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+  const getRoom = useCallback(async (signal?: AbortSignal) => {
+    try {
+      setLoading(true);
+      setErrors(null);
 
-    // Fetch rooms on component mount
-    useEffect(() => {
-        const controller = new AbortController();
-        getRoom(controller.signal);
+      const res = await instance.get<RoomResponse>("/room/get/rooms", {
+        signal,
+      });
 
-        return () => {
-            controller.abort();
-            if (cancelTokenSource) {
-                cancelTokenSource.cancel('Component unmounted');
-            }
-        };
-    }, [getRoom]);
-
-    const createRoom = async (room_name: string, description: string, members: User[]) => {
-        try {
-            setLoading(true);
-            const res = await instance.post("/room/add/rooms", { 
-                room_name, 
-                description, 
-                members 
-            });
-            
-            if (res.data.room) {
-                setRoom(prev => [...prev, res.data.room]);
-                setErrors(null);
-                return res.data.room;
-            }
-            
-            throw new Error('Failed to create room: Invalid response from server');
-        } catch (error) {
-            const apiError = error as ApiError;
-            const errorMessage = apiError.response?.data?.error || 
-                              apiError.response?.data?.message || 
-                              apiError.message || 
-                              'Failed to create room';
-            setErrors(`Error: ${errorMessage}`);
-            console.error("Error creating room:", error);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const addMember = async (roomId: string, memberId: string) => {
-        try {
-            setLoading(true);
-            const response = await instance.post(`/room/add/${roomId}/members`, { 
-                userId: memberId 
-            });
-
-            if (!response.data.success) {
-                throw new Error(response.data.error || 'Failed to add member');
-            }
-
-            if (response.data.room) {
-                setRoom(prevRooms => 
-                    prevRooms.map(room => 
-                        room._id === roomId ? response.data.room : room
-                    )
-                );
-                setErrors(null);
-                return response.data.room;
-            }
-            
-            throw new Error('Failed to update room after adding member');
-        } catch (error) {
-            const apiError = error as ApiError;
-            const errorMessage = apiError.response?.data?.error || 
-                              apiError.response?.data?.message || 
-                              apiError.message || 
-                              'Failed to add member';
-            setErrors(`Error: ${errorMessage}`);
-            console.error("Error adding member:", error);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const deleteMemberToRoom = async (roomId: string, memberId: string) => {
-        try {
-            setLoading(true);
-            const res = await instance.delete(`/room/delete/${roomId}/members/${memberId}`);
-            
-            if (!res.data.success) {
-                throw new Error(res.data.error || 'Failed to remove member');
-            }
-
-            // Update the room by removing the member from the members array
-            setRoom(prevRooms => 
-                prevRooms.map(room => {
-                    if (room._id === roomId) {
-                        return {
-                            ...room,
-                            members: room.members.filter(member => member._id !== memberId)
-                        };
-                    }
-                    return room;
-                })
-            );
-            
-            setErrors(null);
-            return res.data.message;
-        } catch (error) {
-            const apiError = error as ApiError;
-            const errorMessage = apiError.response?.data?.error || 
-                              apiError.response?.data?.message || 
-                              apiError.message || 
-                              'Failed to remove member';
-            setErrors(`Error: ${errorMessage}`);
-            console.error("Error removing member:", error);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const updateRoomInformation = async (roomId: string, roomUpdates: Partial<Room>) => {
-        try {
-            setLoading(true);
-            const res = await instance.put(`/room/update/room/${roomId}`, roomUpdates);
-            
-            if (!res.data.success) {
-                throw new Error(res.data.error || 'Failed to update room');
-            }
-
-            if (res.data.room) {
-                setRoom(prev => prev.map(r => r._id === roomId ? res.data.room : r));
-                setErrors(null);
-                return res.data.room;
-            }
-            
-            throw new Error('Failed to update room: Invalid response from server');
-        } catch (error) {
-            const apiError = error as ApiError;
-            const errorMessage = apiError.response?.data?.error || 
-                              apiError.response?.data?.message || 
-                              apiError.message || 
-                              'Failed to update room';
-            setErrors(`Error: ${errorMessage}`);
-            console.error("Error updating room:", error);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const deleteRoom = async (roomId: string) => {
-        try {
-            setLoading(true);
-            const res = await instance.delete(`/room/delete/rooms/${roomId}`);
-            
-            if (!res.data.success) {
-                throw new Error(res.data.error || 'Failed to delete room');
-            }
-
-            setRoom(prev => prev.filter(r => r._id !== roomId));
-            setErrors(null);
-            return res.data.message;
-        } catch (error) {
-            const apiError = error as ApiError;
-            const errorMessage = apiError.response?.data?.error || 
-                              apiError.response?.data?.message || 
-                              apiError.message || 
-                              'Failed to delete room';
-            setErrors(`Error: ${errorMessage}`);
-            console.error("Error deleting room:", error);
-            throw error;
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="h-screen w-full flex items-center justify-center">
-                <div className="w-1/2 h-1/2">
-                    <Loader />
-                </div>
-            </div>
-        )
+      const { adminRooms = [], memberRooms = [] } = res.data;
+      setRoom([...adminRooms, ...memberRooms]);
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to fetch rooms";
+      setErrors(`Error: ${errorMessage}`);
+      console.error("Error fetching rooms:", error);
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    if (errors) {
-        return (
-            <div className="h-screen w-full flex items-center justify-center">
-                <div className="w-1/2 h-1/2 flex flex-col">
-                    <FileWarning />
-                    <div>{errors}</div>
-                </div>
-            </div>
-        )
+  // Fetch rooms on component mount
+  useEffect(() => {
+    const controller = new AbortController();
+    getRoom(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
+  }, [getRoom]);
+
+  const createRoom = async (
+    room_name: string,
+    description: string,
+    members: User[]
+  ) => {
+    try {
+      setLoading(true);
+      const res = await instance.post("/room/add/rooms", {
+        room_name,
+        description,
+        members,
+      });
+
+      if (res.data.room) {
+        setRoom((prev) => [...prev, res.data.room]);
+        setErrors(null);
+        return res.data.room;
+      }
+
+      throw new Error("Failed to create room: Invalid response from server");
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to create room";
+      setErrors(`Error: ${errorMessage}`);
+      console.error("Error creating room:", error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const contextValue = {
-        room,
-        loading,
-        errors,
-        getRoom,
-        createRoom,
-        addMember,
-        deleteMemberToRoom,
-        updateRoomInformation,
-        deleteRoom
+  const addMember = async (roomId: string, memberId: string) => {
+    try {
+      setLoading(true);
+      const response = await instance.post(`/room/add/${roomId}/members`, {
+        userId: memberId,
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || "Failed to add member");
+      }
+
+      if (response.data.room) {
+        setRoom((prevRooms) =>
+          prevRooms.map((room) =>
+            room._id === roomId ? response.data.room : room
+          )
+        );
+        setErrors(null);
+        return response.data.room;
+      }
+
+      throw new Error("Failed to update room after adding member");
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to add member";
+      setErrors(`Error: ${errorMessage}`);
+      console.error("Error adding member:", error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return (
-        <RoomContext.Provider value={contextValue}>{ children }</RoomContext.Provider>
-    )
-}
+  const deleteMemberToRoom = async (roomId: string, memberId: string) => {
+    try {
+      setLoading(true);
+      const res = await instance.delete(
+        `/room/delete/${roomId}/members/${memberId}`
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.error || "Failed to remove member");
+      }
+
+      // Update the room by removing the member from the members array
+      setRoom((prevRooms) =>
+        prevRooms.map((room) => {
+          if (room._id === roomId) {
+            return {
+              ...room,
+              members: (room.members || []).filter(member => member._id !== memberId)
+            };
+          }
+          return room;
+        })
+      );
+
+      setErrors(null);
+      return res.data.message;
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to remove member";
+      setErrors(`Error: ${errorMessage}`);
+      console.error("Error removing member:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateRoomInformation = async (
+    roomId: string,
+    roomUpdates: Partial<Room>
+  ) => {
+    try {
+      setLoading(true);
+      const res = await instance.put(
+        `/room/update/room/${roomId}`,
+        roomUpdates
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.error || "Failed to update room");
+      }
+
+      if (res.data.room) {
+        setRoom((prev) =>
+          prev.map((r) => (r._id === roomId ? res.data.room : r))
+        );
+        setErrors(null);
+        return res.data.room;
+      }
+
+      throw new Error("Failed to update room: Invalid response from server");
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to update room";
+      setErrors(`Error: ${errorMessage}`);
+      console.error("Error updating room:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteRoom = async (roomId: string) => {
+    try {
+      setLoading(true);
+      const res = await instance.delete(`/room/delete/rooms/${roomId}`);
+
+      if (!res.data.success) {
+        throw new Error(res.data.error || "Failed to delete room");
+      }
+
+      setRoom((prev) => prev.filter((r) => r._id !== roomId));
+      setErrors(null);
+      return res.data.message;
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to delete room";
+      setErrors(`Error: ${errorMessage}`);
+      console.error("Error deleting room:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+ 
+
+  const contextValue = {
+    room,
+    loading,
+    errors,
+    getRoom,
+    createRoom,
+    addMember,
+    deleteMemberToRoom,
+    updateRoomInformation,
+    deleteRoom,
+  };
+
+ 
+  return (
+    <RoomContext.Provider value={contextValue}>{children}</RoomContext.Provider>
+  );
+};
