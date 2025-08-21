@@ -2,6 +2,7 @@
 import { useContext } from 'react';
 import { RoomContext } from '../context';
 import type { Room } from '../types/room';
+import type { User } from '../types/user';
 
 export const useRoom = () => {
     const context = useContext(RoomContext);
@@ -11,6 +12,7 @@ export const useRoom = () => {
     return context as { 
         room: Room[]; 
         getRoom: () => void;
+        createRoom: (room_name: string, description: string, members: User[]) => Promise<void>;
         // Add other methods from your context here
     };
 };

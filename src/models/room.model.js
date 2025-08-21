@@ -36,14 +36,6 @@ const roomSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        validate: [
-          {
-            validator: function (v) {
-              return v.length <= MAX_MEMBERS;
-            },
-            message: `Une salle ne peut pas avoir plus de ${MAX_MEMBERS} membres`,
-          },
-        ],
       },
     ],
     tasks: [

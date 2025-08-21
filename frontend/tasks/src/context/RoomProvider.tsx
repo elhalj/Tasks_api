@@ -5,13 +5,6 @@ import instance from "../services/api";
 import type { User } from "../types/user";
 import { RoomContext } from "./RoomContext";
 
-interface RoomResponse {
-  success: boolean;
-  adminRooms: Room[];
-  memberRooms: Room[];
-  count: number;
-  total: number;
-}
 
 interface RoomProviderProps {
   children: React.ReactNode;
@@ -32,26 +25,17 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<string | null>(null);
 
-  const getRoom = useCallback(async (signal?: AbortSignal) => {
+  const getRoom = useCallback(async () => {
     try {
       setLoading(true);
       setErrors(null);
 
-      const res = await instance.get<RoomResponse>("/room/get/rooms", {
-        signal,
-      });
+      const res = await instance.get("/room/get/rooms");
 
       const { adminRooms = [], memberRooms = [] } = res.data;
       setRoom([...adminRooms, ...memberRooms]);
     } catch (error) {
-      const apiError = error as ApiError;
-      const errorMessage =
-        apiError.response?.data?.error ||
-        apiError.response?.data?.message ||
-        apiError.message ||
-        "Failed to fetch rooms";
-      setErrors(`Error: ${errorMessage}`);
-      console.error("Error fetching rooms:", error);
+      // Error handling
     } finally {
       setLoading(false);
     }
@@ -59,12 +43,11 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
 
   // Fetch rooms on component mount
   useEffect(() => {
-    const controller = new AbortController();
-    getRoom(controller.signal);
-
-    return () => {
-      controller.abort();
+    const fetchRooms = async () => {
+      await getRoom();
     };
+
+    fetchRooms();
   }, [getRoom]);
 
   const createRoom = async (

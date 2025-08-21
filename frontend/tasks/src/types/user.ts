@@ -1,4 +1,6 @@
-import type { Task } from "../context";
+
+import type { Room } from "./room";
+import type { Task } from "./task";
 
 export interface Profile {
     firstName: string;
