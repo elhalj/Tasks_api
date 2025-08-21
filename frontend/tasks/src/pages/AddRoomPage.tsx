@@ -3,7 +3,7 @@ import CreateRoom from "../ui/room/CreateRoom"
 
 const AddRoomPage = () => {
   return (
-    <div>
+    <div className="h-screen p-8">
       <CreateRoom/>
     </div>
   )

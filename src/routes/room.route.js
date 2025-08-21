@@ -78,20 +78,6 @@ export const roomRoutes = async (fastify, options) => {
           .session(session);
 
         const existingMemberIds = existingMembers.map((member) => member._id);
-        const nonExistingMembers = membersToAdd.filter(
-          (id) =>
-            !existingMemberIds.some((memberId) => memberId.toString() === id)
-        );
-
-        if (nonExistingMembers.length > 0) {
-          await session.abortTransaction();
-          session.endSession();
-          return reply.code(404).send({
-            success: false,
-            error: "Certains utilisateurs n'existent pas",
-            invalidUsers: nonExistingMembers,
-          });
-        }
 
         // Créer la salle avec l'admin comme premier membre
         const roomData = {
@@ -316,7 +302,7 @@ export const roomRoutes = async (fastify, options) => {
 
         // Retirer l'utilisateur de la salle
         room.members.splice(memberIndex, 1);
-        
+
         // Si c'est l'admin qui est retiré, désigner un nouvel admin ou supprimer la salle
         if (userId === room.admin.toString()) {
           if (room.members.length > 0) {
@@ -371,7 +357,7 @@ export const roomRoutes = async (fastify, options) => {
         session.endSession();
         return handleError(error, reply);
       }
-    },
+    }
   );
 
   // Update room information

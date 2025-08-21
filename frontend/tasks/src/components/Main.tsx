@@ -19,10 +19,10 @@ const Main = () => {
           <UtilsBar viewMode={viewMode} setViewMode={setViewMode} />
           {/* Taches */}
       <Tasks viewMode={viewMode} />
-      {/* Rooms */}
-      <Room/>
           {/* Satts */}
           <Stats/>
+      {/* Rooms */}
+      <Room/>
     </div>
   )
 }

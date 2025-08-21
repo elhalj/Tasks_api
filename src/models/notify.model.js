@@ -80,6 +80,8 @@ notificationSchema.statics.createNotification = async function(notificationData)
   return notification.save();
 };
 
-const Notification = mongoose.model("Notification", notificationSchema);
+// Register the model if it doesn't exist
+const Notification = mongoose.models.Notification || mongoose.model("Notification", notificationSchema);
 
+export { Notification };
 export default Notification;
