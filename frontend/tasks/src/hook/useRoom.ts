@@ -13,6 +13,7 @@ export const useRoom = () => {
         room: Room[]; 
         getRoom: () => void;
         createRoom: (room_name: string, description: string, members: User[]) => Promise<void>;
+        addMember: (roomId: string, memberId: string) => Promise<void>;
         // Add other methods from your context here
     };
 };
