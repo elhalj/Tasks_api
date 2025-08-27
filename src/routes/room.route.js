@@ -182,6 +182,7 @@ export const roomRoutes = async (fastify, options) => {
         if (room.members.length >= maxMembers) {
           await session.abortTransaction();
           session.endSession();
+          console.log(error.message);
           return reply.code(400).send({
             success: false,
             error: ERROR_MESSAGES.ROOM_LIMIT_REACHED,
@@ -214,6 +215,7 @@ export const roomRoutes = async (fastify, options) => {
       } catch (error) {
         await session.abortTransaction();
         session.endSession();
+        console.log(error.message);
         return handleError(error, reply);
       }
     }

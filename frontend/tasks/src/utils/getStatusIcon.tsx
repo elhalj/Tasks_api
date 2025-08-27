@@ -1,5 +1,6 @@
-import type { Task } from "../context";
+
 import { CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import type { Task } from '../types/task';
 
 export const getStatusIcon = (status: Task["status"]) => {
   switch(status) {
