@@ -191,8 +191,8 @@ const CreateTask = () => {
         {errors && (<p className="bg-red-400 text-white p-2 rounded-lg">{ errors}</p>)}
         <button
           type="submit"
-          disabled={loading}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={loading || new Date(myTask.dueDate) <= new Date()}
+          className={` text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${loading || new Date(myTask.dueDate) <= new Date() ? "bg-blue-300 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-700"}`}
         >
           {loading ? "Ajout en cours..." : "Ajouter"}
         </button>

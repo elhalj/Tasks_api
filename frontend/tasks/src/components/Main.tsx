@@ -3,10 +3,11 @@ import { useContext, useState } from "react";
 import Stats from "../ui/Stats";
 import UtilsBar from "../ui/UtilsBar";
 import Room from "./Room";
-import { AuthContext } from "../context";
+import { AuthContext, TaskContext } from "../context";
 
 const Main = () => {
   const [viewMode, setViewMode] = useState("grid");
+  const {tasks} = useContext(TaskContext)
   const { user } = useContext(AuthContext);
 
   if (!user) {
@@ -21,7 +22,7 @@ const Main = () => {
       {/* Rooms */}
       <Room />
       {/* Satts */}
-      <Stats />
+      <Stats tasks={tasks} />
     </div>
   );
 };

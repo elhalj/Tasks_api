@@ -5,17 +5,18 @@ import { Link } from "react-router-dom";
 import { CheckCircle2, MoreHorizontal, Plus } from "lucide-react";
 import getPriorityColor from "../utils/getPriorities";
 import { getStatusIcon } from "../utils/getStatusIcon";
+import Loader from "../components/Loader";
 
 const Tasks = ({ viewMode }: {viewMode: string}) => {
-  const { tasks, getTasks, deleteTask } = useContext(TaskContext);
-  const { user } = useContext(AuthContext);
+  const { tasks, getTasks, deleteTask, loading } = useContext(TaskContext);
+  const { currentUser } = useContext(AuthContext);
 
   // Load tasks on component mount
   useEffect(() => {
     getTasks();
   }, [getTasks]);
 
-  if (user && tasks.length === 0) {
+  if (currentUser && tasks.length === 0) {
     return <div className="text-center text-lg">Vous n'avez pas de taches</div>;
   }
 
@@ -112,7 +113,9 @@ const Tasks = ({ viewMode }: {viewMode: string}) => {
       )}
     </div>
   ))
-
+  if (loading) {
+   return <Loader/>
+ }
   return (
     <TasksList/>
   );

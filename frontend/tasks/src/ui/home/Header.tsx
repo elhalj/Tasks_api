@@ -5,7 +5,7 @@ import { AuthContext } from "../../context"
 
 
 const Header = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsMenuOpen: (isOpen: boolean) => void }) => {
-    const {user} = useContext(AuthContext)
+    const {currentUser} = useContext(AuthContext)
   return (
     <div>
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
@@ -30,7 +30,7 @@ const Header = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsMenuO
               <a href="#temoignages" className="text-gray-700 hover:text-blue-600 transition-colors">Témoignages</a>
               <a href="#contact" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
                           <a href="/login" className="text-gray-700 hover:text-blue-600 transition-colors">Se connecter</a>
-                          <div>{ user ? (<div><button type="button"><Link to="dashboard">Dashboard</Link></button></div>) : ""}</div>
+                          <div>{ currentUser ? (<div><button type="button"><Link to="dashboard">Dashboard</Link></button></div>) : ""}</div>
             </nav>
 
             {/* CTA et Menu Mobile */}
@@ -63,7 +63,7 @@ const Header = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsMenuO
               </div>
             </div>
                   )}
-                  <div>{ user ? (<div><button type="button"><Link to="dashboard">Dashboard</Link></button></div>) : ""}</div>
+                  <div>{ currentUser ? (<div><button type="button"><Link to="dashboard">Dashboard</Link></button></div>) : ""}</div>
         </div>
       </header>
     </div>

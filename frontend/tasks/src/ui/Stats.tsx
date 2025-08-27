@@ -1,13 +1,15 @@
 import { AlertCircle, CheckCircle2, Clock, TrendingUp } from "lucide-react";
+import type { Task } from "../types/task";
 
 
-const Stats = () => {
+const Stats = ({tasks}: {tasks: Task[]}) => {
      // Données d'exemple
   const stats = [
-    { label: 'Total', value: 24, icon: Clock, color: 'bg-blue-500' },
-    { label: 'Complétées', value: 12, icon: CheckCircle2, color: 'bg-green-500' },
-    { label: 'En cours', value: 8, icon: TrendingUp, color: 'bg-yellow-500' },
-    { label: 'Urgentes', value: 4, icon: AlertCircle, color: 'bg-red-500' }
+    { label: 'Total', value: tasks.length, icon: Clock, color: 'bg-blue-500' },
+    { label: 'Complétées', value: tasks.filter(t => t.completed).length, icon: CheckCircle2, color: 'bg-green-500' },
+    { label: 'En cours', value: tasks.filter(t => t.status === "in_progress").length, icon: TrendingUp, color: 'bg-yellow-500' },
+    { label: 'Urgentes', value: tasks.filter(t => t.priority === "high").length, icon: AlertCircle, color: 'bg-red-500' },
+    { label: 'Tres Urgentes', value: tasks.filter(t => t.priority === "critical").length, icon: AlertCircle, color: 'bg-red-900' }
   ];
   return (
     <div>

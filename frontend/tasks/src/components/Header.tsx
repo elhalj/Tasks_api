@@ -4,7 +4,7 @@ import { AuthContext } from "../context";
 import { NavLink } from "react-router-dom";
 
 const Header = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { currentUser, logout } = useContext(AuthContext);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -59,7 +59,7 @@ const Header = () => {
               <div className="w-22 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex flex-col items-center justify-center">
                 <User className="w-5 h-5 text-white" />
                 <span className="flex p-1 items-center justify-center text-white text-center font-bold">
-                  {user && user.userName}
+                  {currentUser && currentUser.userName}
                 </span>
               </div>
 
@@ -116,7 +116,7 @@ const Header = () => {
                 <div className="w-22 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex flex-col items-center justify-center">
                   <User className="w-5 h-5 text-white" />
                   <span className="flex p-1 items-center justify-center text-white text-center font-bold">
-                    {user && user.userName}
+                    {currentUser && currentUser.userName}
                   </span>
                 </div>
 

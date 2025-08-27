@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useRoom } from "../hook/useRoom";
 import type { Room } from "../types/room";
@@ -16,10 +16,12 @@ import {
   Activity
 } from "lucide-react";
 import AddMember from "../ui/room/AddMember";
+import { AuthContext } from "../context";
 
 const RoomId = () => {
   const { id } = useParams<{ id: string }>();
   const { room, getRoom } = useRoom();
+  const {currentUser} = useContext(AuthContext)
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -183,7 +185,9 @@ const RoomId = () => {
                       </div>
                       <div>
                         <p className="font-medium text-slate-100 text-sm">{member.userName || member.email}</p>
-                        <p className="text-xs text-slate-500">Team Member</p>
+                        <p className="text-xs text-slate-500">
+                          {currentUser && member._id === currentUser._id ? "Admin" : "Team Member"}
+                        </p>
                       </div>
                     </div>
                   )) || (
