@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../../context";
 import { useRoom } from "../../hook/useRoom";
 import type { User } from "../../types/user";
+import Loader from "../../components/Loader";
 
 interface RoomFormData {
   room_name: string;
@@ -25,6 +26,7 @@ const CreateRoom = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        setLoading(true)
         await getAllUser();
         if (Array.isArray(user)) {
           setAvailableUsers(user);
@@ -32,11 +34,13 @@ const CreateRoom = () => {
       } catch (error) {
         console.error("Error fetching users:", error);
         setErrors("Failed to load users");
+      } finally {
+        setLoading(false)
       }
     };
     fetchUsers();
     
-  }, [getAllUser, user]);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -84,6 +88,9 @@ const CreateRoom = () => {
     }
   },[formData, createRoom]);
 
+  if (loading) {
+    return <Loader/>
+  }
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <Link to="/dashboard">
@@ -138,6 +145,7 @@ const CreateRoom = () => {
             Membres *
           </label>
           <div className="max-h-60 overflow-y-auto border border-gray-300 rounded p-2">
+            {loading && (<Loader/>)}
             {availableUsers.length > 0 ? (
               availableUsers.map((user) => (
                 <div 
