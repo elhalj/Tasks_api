@@ -1,4 +1,5 @@
-import type { Task } from "../context";
+import type { Task } from "../types/task";
+
 
 const getPriorityColor = (priority: Task["priority"]) => {
     switch(priority) {

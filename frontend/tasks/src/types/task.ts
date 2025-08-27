@@ -21,7 +21,10 @@ export interface Task {
     startDate?: Date;
     estimatedHours?: number;
     timeSpent?: number;
-    assignees?: string[]; // Using string[] to match the API expectations
+    assignees?: {
+        name: string;
+        email: string
+    }; // Using string[] to match the API expectations
     roomId?: string;
     labels?: string[];
     attachements?: AttachementProp;

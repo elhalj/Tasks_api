@@ -4,7 +4,7 @@ import { generateToken } from "../utils/token.js";
 export const authRoute = async (fastify) => {
   //get ALL user (Admin)
   fastify.get("/user", async (request, reply) => {
-    const users = await User.find({}).populate("myTasks").populate("rooms");
+    const users = await User.find({}).populate("userName email");
 
     return users;
   });

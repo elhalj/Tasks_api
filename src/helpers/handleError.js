@@ -1,6 +1,6 @@
 // Fonction utilitaire pour gérer les erreurs
 export const handleError = (error, reply) => {
-  console.error(error);
+  console.error(error.message);
 
   if (error.name === "ValidationError") {
     const errors = Object.values(error.errors).map((err) => err.message);
@@ -20,6 +20,6 @@ export const handleError = (error, reply) => {
 
   return reply.code(500).send({
     success: false,
-    error: "Une erreur est survenue lors du traitement de votre demande",
+    error: error.message,
   });
 };
