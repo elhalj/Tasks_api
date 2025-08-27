@@ -9,6 +9,7 @@ import socketServices, {
   type SocketUserStatusEvents,
 } from "../services/socketServices";
 import type { Task } from "../types/task";
+import { Link } from "react-router-dom";
 
 interface TaskProviderProps {
   children: React.ReactNode;
@@ -325,7 +326,17 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
 
   // Render error message if there's an error
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="h-screen flex flex-col justify-center items-center">
+        <div className="bg-red-400 p-4 rounded-lg flex flex-col justify-center items-center">
+          <p className="text-8xl text-white uppercase">404</p>
+        <p className="text-4xl text-white">Error: {error}</p>{" "}
+        <div className="bg-blue-300 p-2 rounded-lg">
+          <button type="button" className="text-white" onClick={() => window.location.reload()}>Reessayer</button>
+        </div>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -28,6 +28,7 @@ const CreateTask = () => {
     progress:0
   });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -48,20 +49,47 @@ const CreateTask = () => {
     setMyTask((prev) => ({ ...prev, [name]: value }));
   };
 
+  const validateForm = (title: string, description: string, dueDate: string, estimatedHours: number) => {
+    if (!title || typeof title !== "string" || title.trim().length < 3) {
+      setErrors("Vous devez rentrer au moins 3 caractères au titre");
+      return false;
+    }
+    if (!description || typeof description !== "string" || description.trim().length === 0) {
+      setErrors("Veuillez renseigner une description");
+      return false;
+    }
+    if (!dueDate || typeof dueDate !== "string" || isNaN(Date.parse(dueDate))) {
+      setErrors("Veuillez renseigner une date de fin valide");
+      return false;
+    }
+    if (!estimatedHours || typeof estimatedHours !== "number" || estimatedHours < 0) {
+      setErrors("Veuillez renseigner une estimation de temps valide");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    if (!validateForm(myTask.title, myTask.description, myTask.dueDate, myTask.estimatedHours)) {
+      setLoading(false)
+      return
+    }
     try {
       
       await addTask(myTask.title, myTask.description,myTask.dueDate, myTask.estimatedHours, myTask.completed, myTask.status, myTask.priority, myTask.progress);
       // toast.success("Ajouté avec succès");
       setMyTask({ title: "", description: "",dueDate:"2025-08-15", estimatedHours:14, completed: false , status:"", priority:"", progress:0});
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      setErrors(error.toString())
     } finally {
       setLoading(false);
     }
   };
+
+
   return (
     <>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
@@ -116,6 +144,7 @@ const CreateTask = () => {
             className="mr-2 h-6 w-6 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </label>
+        <div className="flex gap-2">
         <label className="flex flex-col">
           <span className="text-lg font-bold">Status</span>
           <select
@@ -157,8 +186,9 @@ const CreateTask = () => {
             max={100}
             className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </label>
-
+          </label>
+        </div>
+        {errors && (<p className="bg-red-400 text-white p-2 rounded-lg">{ errors}</p>)}
         <button
           type="submit"
           disabled={loading}
