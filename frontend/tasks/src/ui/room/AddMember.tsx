@@ -5,7 +5,7 @@ import Loader from "../../components/Loader";
 
 const AddMember = ({ roomId }: { roomId: string }) => {
   const { user, getAllUser, loading: authLoading } = useContext(AuthContext);
-  const { addMember } = useRoom();
+  const { addMember} = useRoom();
   const [errors, setErrors] = useState("");
   const [addingMemberId, setAddingMemberId] = useState<string | null>(null);
 
@@ -30,8 +30,8 @@ const AddMember = ({ roomId }: { roomId: string }) => {
     
     try {
       setAddingMemberId(userId);
-      setErrors("");
       await addMember(roomId, userId);
+      setErrors("")
     } catch (error) {
       setErrors("Erreur lors de l'ajout du membre");
       console.error("Error adding member:", error);

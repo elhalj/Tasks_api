@@ -89,9 +89,7 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
   const addMember = async (roomId: string, memberId: string) => {
     try {
       setLoading(true);
-      const response = await instance.post(`/room/add/${roomId}/members`, {
-        userId: memberId,
-      });
+      const response = await instance.post(`/room/add/${roomId}/${memberId}`);
 
       if (!response.data.success) {
         throw new Error(response.data.error || "Failed to add member");
