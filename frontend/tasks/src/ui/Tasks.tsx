@@ -16,6 +16,11 @@ const Tasks = ({ viewMode }: {viewMode: string}) => {
     getTasks();
   }, [getTasks]);
 
+
+  if (loading) {
+   return <Loader/>
+ }
+
   if (currentUser && tasks.length === 0) {
     return <div className="text-center text-lg">Vous n'avez pas de taches</div>;
   }
@@ -113,9 +118,6 @@ const Tasks = ({ viewMode }: {viewMode: string}) => {
       )}
     </div>
   ))
-  if (loading) {
-   return <Loader/>
- }
   return (
     <TasksList/>
   );

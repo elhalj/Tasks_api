@@ -122,13 +122,12 @@ export const roomRoutes = async (fastify, options) => {
 
   // Add member to room
   fastify.post(
-    "/add/:roomId/members",
+    "/add/:roomId/:memberId",
     {
       preHandler: fastify.authenticate,
     },
     async (request, reply) => {
-      const { userId } = request.body;
-      const { roomId } = request.params;
+      const { roomId, memberId } = request.params;
       const currentUserId = request.user.userId;
       const session = await mongoose.startSession();
 
@@ -136,7 +135,7 @@ export const roomRoutes = async (fastify, options) => {
         session.startTransaction();
 
         // Vérifier que l'utilisateur à ajouter existe
-        const userToAdd = await User.findById(userId).session(session);
+        const userToAdd = await User.findById(memberId).session(session);
         if (!userToAdd) {
           await session.abortTransaction();
           session.endSession();
@@ -166,13 +165,13 @@ export const roomRoutes = async (fastify, options) => {
           });
         }
 
-        // Vérifier si l'utilisateur est déjà membre
-        if (room.members.some((memberId) => memberId.toString() === userId)) {
+        // Avant d'ajouter le membre
+        if (room.members.includes(memberId)) {
           await session.abortTransaction();
           session.endSession();
           return reply.code(400).send({
             success: false,
-            error: ERROR_MESSAGES.ALREADY_MEMBER,
+            error: "Cet utilisateur est déjà membre de la salle",
           });
         }
 
@@ -190,7 +189,7 @@ export const roomRoutes = async (fastify, options) => {
         }
 
         // Ajouter l'utilisateur à la salle
-        room.members.push(userId);
+        room.members.push(memberId);
         await room.save({ session });
 
         // Mettre à jour la référence de l'utilisateur
@@ -203,7 +202,8 @@ export const roomRoutes = async (fastify, options) => {
         // Récupérer la salle avec les données peuplées
         const populatedRoom = await Room.findById(room._id)
           .populate("admin", "userName email avatar")
-          .populate("members", "userName email avatar");
+          .populate("members", "userName email avatar")
+          .lean();
 
         // Ici, vous pourriez ajouter une notification à l'utilisateur ajouté
 
