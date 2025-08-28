@@ -49,7 +49,7 @@ const CreateTask = () => {
     setMyTask((prev) => ({ ...prev, [name]: value }));
   };
 
-  const validateForm = (title: string, description: string, dueDate: string, estimatedHours: number) => {
+  const validateForm = (title: string, description: string, dueDate: string) => {
     if (!title || typeof title !== "string" || title.trim().length < 3) {
       setErrors("Vous devez rentrer au moins 3 caractères au titre");
       return false;
@@ -62,17 +62,17 @@ const CreateTask = () => {
       setErrors("Veuillez renseigner une date de fin valide");
       return false;
     }
-    if (!estimatedHours || typeof estimatedHours !== "number" || estimatedHours < 0) {
-      setErrors("Veuillez renseigner une estimation de temps valide");
-      return false;
-    }
+    // if (!estimatedHours || typeof estimatedHours !== "number") {
+    //   setErrors("Veuillez renseigner une estimation de temps valide");
+    //   return false;
+    // }
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    if (!validateForm(myTask.title, myTask.description, myTask.dueDate, myTask.estimatedHours)) {
+    if (!validateForm(myTask.title, myTask.description, myTask.dueDate)) {
       setLoading(false)
       return
     }

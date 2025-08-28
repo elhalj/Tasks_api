@@ -49,6 +49,7 @@ const Tasks = ({ viewMode }: {viewMode: string}) => {
                 >
                   {task.priority}
                 </span>
+                <span className="bg-gray-200 text-red-400 p-1 rounded-lg">Echéance: { new Date(task.dueDate).toLocaleDateString("fr-FR")}</span>
               </div>
               <button type="button" className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-white transition-all">
                 <MoreHorizontal className="w-4 h-4" /> {}
