@@ -13,7 +13,7 @@ export interface TaskProps {
     dueDate: string,
     estimatedHours: number,
     // assignees: string[],
-    // roomId: string,
+    roomId?: string,
     completed?: boolean,
     status?: string,
     priority?: string,

@@ -9,7 +9,6 @@ import socketServices, {
   type SocketUserStatusEvents,
 } from "../services/socketServices";
 import type { Task } from "../types/task";
-import { Link } from "react-router-dom";
 
 interface TaskProviderProps {
   children: React.ReactNode;
@@ -46,7 +45,7 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       dueDate: string,
       estimatedHours: number,
       // assignees: string[],
-      // roomId: string,
+      roomId?: string,
       completed: boolean = false,
       status: string = "pending",
       priority: string = "low",
@@ -59,7 +58,7 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
           dueDate,
           estimatedHours,
           // assignees,
-          // roomId,
+          roomId,
           completed,
           status,
           priority,

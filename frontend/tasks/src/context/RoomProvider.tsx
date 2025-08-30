@@ -86,10 +86,10 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
     }
   };
 
-  const addMember = async (roomId: string, memberId: string) => {
+  const addMember = async (roomId: string, memberId: User) => {
     try {
       setLoading(true);
-      const response = await instance.post(`/room/add/${roomId}/${memberId}`);
+      const response = await instance.post(`/room/add/${roomId}/${memberId._id}`);
 
       if (!response.data.success) {
         throw new Error(response.data.error || "Failed to add member");
@@ -102,7 +102,6 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
           )
         );
         setErrors(null);
-        return response.data.room;
       }
 
       throw new Error("Failed to update room after adding member");
@@ -112,7 +111,7 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
         apiError.response?.data?.error ||
         apiError.response?.data?.message ||
         apiError.message ||
-        "Failed to add member";
+        "Erreur lors de l'ajout du membre";
       setErrors(`Error: ${errorMessage}`);
       console.error("Error adding member:", error);
       throw error;

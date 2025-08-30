@@ -1,5 +1,6 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { TaskContext } from "../context";
+import { useRoom } from "../hook/useRoom";
 
 interface TaskProps {
   title: string;
@@ -9,15 +10,23 @@ interface TaskProps {
   estimatedHours: number;
   status: string;
   priority: string;
-  progress: number
+  progress: number;
+  roomId?: string
+}
+interface CreateTaskProps {
+  roomId?: string;
 }
 
 const statusTable = ["pending", "in_progress", "done", "canceled"];
 const priorityTable = ["low", "medium", "high", "critical"];
 
-const CreateTask = () => {
+const CreateTask = ({ roomId }: CreateTaskProps) => {
   const { addTask } = useContext(TaskContext);
-  const [myTask, setMyTask] = useState<TaskProps>({
+  const { room, getRoom } = useRoom()
+  useEffect(() => {
+    getRoom()
+  },[getRoom])
+  const [myTask, setMyTask] = useState<TaskProps>(() => ({
     title: "",
     description: "",
     dueDate: "2025-08-15",
@@ -25,8 +34,19 @@ const CreateTask = () => {
     completed: false,
     status: "pending",
     priority: "low",
-    progress:0
-  });
+    progress: 0,
+    roomId: roomId || ""
+  }));
+
+  // Mise à jour de roomId si la prop change
+  useEffect(() => {
+    if (roomId) {
+      setMyTask(prev => ({
+        ...prev,
+        roomId: roomId
+      }));
+    }
+  }, [roomId]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState("");
 
@@ -47,6 +67,13 @@ const CreateTask = () => {
   const handleTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setMyTask((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRoomChange = (roomId: string) => {
+    setMyTask(prev => ({
+      ...prev,
+      roomId: prev.roomId === roomId ? undefined : roomId
+    }));
   };
 
   const validateForm = (title: string, description: string, dueDate: string) => {
@@ -73,14 +100,31 @@ const CreateTask = () => {
     e.preventDefault();
     setLoading(true);
     if (!validateForm(myTask.title, myTask.description, myTask.dueDate)) {
-      setLoading(false)
-      return
+      setLoading(false);
+      return;
     }
     try {
-      
-      await addTask(myTask.title, myTask.description,myTask.dueDate, myTask.estimatedHours, myTask.completed, myTask.status, myTask.priority, myTask.progress);
-      // toast.success("Ajouté avec succès");
-      setMyTask({ title: "", description: "",dueDate:"2025-08-15", estimatedHours:14, completed: false , status:"", priority:"", progress:0});
+      await addTask(
+        myTask.title,
+        myTask.description,
+        myTask.dueDate,
+        myTask.estimatedHours,
+        roomId,  // roomId est maintenant le 5ème paramètre
+        myTask.completed,
+        myTask.status,
+        myTask.priority,
+        myTask.progress
+      );
+      setMyTask({ 
+        title: "", 
+        description: "",
+        dueDate: "2025-08-15", 
+        estimatedHours: 14, 
+        completed: false, 
+        status: "pending", 
+        priority: "low", 
+        progress: 0 
+      });
     } catch (error: any) {
       console.error(error);
       setErrors(error.toString())
@@ -92,7 +136,7 @@ const CreateTask = () => {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2 w-lg">
         <label className="flex flex-col">
           <span className="text-lg font-bold">Titre</span>
           <input
@@ -188,6 +232,21 @@ const CreateTask = () => {
           />
           </label>
         </div>
+        <label>RoomList 
+          <div className="flex gap-2 ">
+            {room.map(r => (
+            <div key={r._id}>
+              <input 
+                type="checkbox" 
+                checked={myTask.roomId === r._id}
+                onChange={() => r._id && handleRoomChange(r._id)}
+                className="mr-2 h-6 w-6 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <span>{ r.room_name}</span>
+            </div>
+          ))}
+          </div>
+        </label>
         {errors && (<p className="bg-red-400 text-white p-2 rounded-lg">{ errors}</p>)}
         <button
           type="submit"
