@@ -1,15 +1,20 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect} from "react";
 import { AuthContext } from "../../context";
 import { Link } from "react-router-dom";
 import { useRoom } from "../../hook/useRoom";
+import Loader from "../../components/Loader";
 
 const RoomUI = () => {
-  const { room, getRoom } = useRoom();
+  const { room, getRoom, loading} = useRoom();
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
     getRoom();
   }, [getRoom]);
+
+  if (loading) {
+    return <Loader/>
+  }
 
   if (user && room.length === 0) {
     return (
@@ -18,6 +23,7 @@ const RoomUI = () => {
       </div>
     );
   }
+
   const RoomRow = React.memo(() =>
     room.map((r) => {
       // Get the first user in the array or undefined if empty
@@ -27,9 +33,9 @@ const RoomUI = () => {
           key={r._id}
           className="text-white p-4 border-2 border-gray-300 rounded-md bg-gradient-to-br from-white/20 to-indigo-300/50 opacity-80 backdrop-blur-lg"
         >
-          <h1 className="uppercase text-2xl text-black bg-gray-50 w-24 p-2 rounded-lg">Room</h1>
-          <h3 className="text-2xl">{r.room_name}</h3>
-          <p>{r.description}</p>
+          <h1 className="uppercase text-slate-300 bg-gray-50/10  p-2 rounded-lg">Room: {room.findIndex((room) => room._id === r._id) + 1}</h1>
+          <h3 className="text-2xl">Titre: {r.room_name}</h3>
+          {/* <p>{r.description}</p> */}
           <div className="flex flex-col">
             <div className="flex items-center">
               <span className="text-lg font-bold">Membres :</span>
@@ -43,7 +49,7 @@ const RoomUI = () => {
               <Link to={`/dashboard/room/${r._id}`}>
                 <button
                   type="button"
-                  className="ml-4 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-md"
+                  className="ml-4 px-4 py-1 bg-blue-500/50 hover:bg-blue-700/50 text-white font-bold rounded-md"
                 >
                   Voir
                 </button>

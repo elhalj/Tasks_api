@@ -42,6 +42,7 @@ const roomSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Task",
+        default: [],
       },
     ],
     admin: {

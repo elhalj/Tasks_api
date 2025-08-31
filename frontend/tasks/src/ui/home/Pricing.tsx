@@ -37,7 +37,7 @@ const Pricing = () => {
                         <span className="text-gray-600">Support email</span>
                       </li>
                     </ul>
-                    <button className="w-full border border-blue-600 text-blue-600 py-3 rounded hover:bg-blue-50 transition-colors">
+                    <button type="button" className="w-full border border-blue-600 text-blue-600 py-3 rounded hover:bg-blue-50 transition-colors">
                       Commencer
                     </button>
                   </div>
@@ -72,7 +72,7 @@ const Pricing = () => {
                         <span>Support prioritaire</span>
                       </li>
                     </ul>
-                    <button className="w-full bg-white text-blue-600 py-3 rounded hover:bg-gray-50 transition-colors font-semibold">
+                    <button type="button" className="w-full bg-white text-blue-600 py-3 rounded hover:bg-gray-50 transition-colors font-semibold">
                       Essai Gratuit
                     </button>
                   </div>
@@ -102,7 +102,7 @@ const Pricing = () => {
                         <span className="text-gray-600">Support 24/7</span>
                       </li>
                     </ul>
-                    <button className="w-full border border-blue-600 text-blue-600 py-3 rounded hover:bg-blue-50 transition-colors">
+                    <button type="button" className="w-full border border-blue-600 text-blue-600 py-3 rounded hover:bg-blue-50 transition-colors">
                       Nous Contacter
                     </button>
                   </div>

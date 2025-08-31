@@ -6,7 +6,7 @@ interface RoomContextType {
     room: Room[];
     getRoom: () => Promise<void>;
     createRoom: (room_name: string, description: string, members: User[]) => Promise<void>;
-    addMember: (roomId: string, memberId: User) => Promise<void>;
+    addMember: (roomId: string, memberId: string) => Promise<void>;
     deleteMemberToRoom: (roomId: string, memberId: string) => Promise<void>;
     updateRoomInformation: (roomId: string, room: Room) => Promise<void>;
     deleteRoom: (roomId: string) => Promise<void>

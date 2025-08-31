@@ -35,10 +35,11 @@ const Header = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsMenuO
 
             {/* CTA et Menu Mobile */}
             <div className="flex items-center space-x-4">
-              <button className="hidden md:block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+              <button type="button" className="hidden md:block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
                 <Link to="/login">Essai Gratuit</Link>
               </button>
               <button 
+                type="button"
                 className="md:hidden p-2"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
@@ -57,7 +58,7 @@ const Header = ({ isMenuOpen, setIsMenuOpen }: { isMenuOpen: boolean, setIsMenuO
                 <a href="#temoignages" className="text-gray-700 hover:text-blue-600 py-2">Témoignages</a>
                 <a href="#contact" className="text-gray-700 hover:text-blue-600 py-2">Contact</a>
                 <a href="/login" className="text-gray-700 hover:text-blue-600 py-2">Se connecter</a>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors w-full">
+                <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors w-full">
                   <Link to="/login">Essai Gratuit</Link>
                 </button>
               </div>

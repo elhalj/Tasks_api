@@ -22,6 +22,14 @@ export const roomRoutes = async (fastify, options) => {
           Room.find({ admin: userId, isActive: true })
             .populate("admin", "userName email avatar")
             .populate("members", "userName email avatar")
+            .populate({
+              path: "tasks",
+              select: "title description status priority dueDate assignees",
+              populate: {
+                path: "assignees",
+                select: "userName email",
+              },
+            })
             .sort({ updatedAt: -1 }),
 
           Room.find({
@@ -31,6 +39,14 @@ export const roomRoutes = async (fastify, options) => {
           })
             .populate("admin", "userName email avatar")
             .populate("members", "userName email avatar")
+            .populate({
+              path: "tasks",
+              select: "title description status priority dueDate assignees",
+              populate: {
+                path: "assignees",
+                select: "userName email",
+              },
+            })
             .sort({ updatedAt: -1 }),
         ]);
 
@@ -40,6 +56,7 @@ export const roomRoutes = async (fastify, options) => {
           memberRooms,
           count: adminRooms.length + memberRooms.length,
           total: adminRooms.length + memberRooms.length,
+          // tasks,
         };
       } catch (error) {
         return handleError(error, reply);
@@ -175,26 +192,19 @@ export const roomRoutes = async (fastify, options) => {
           });
         }
 
-        // Vérifier la limite de membres
-        const maxMembers =
-          Room.schema.obj.members[0].validate[0].validator.MAX_MEMBERS;
-        if (room.members.length >= maxMembers) {
-          await session.abortTransaction();
-          session.endSession();
-          console.log(error.message);
-          return reply.code(400).send({
-            success: false,
-            error: ERROR_MESSAGES.ROOM_LIMIT_REACHED,
-          });
-        }
-
         // Ajouter l'utilisateur à la salle
-        room.members.push(memberId);
-        await room.save({ session });
+        await Room.updateOne(
+          { _id: roomId },
+          { $addToSet: { members: memberId } },
+          { session }
+        );
 
         // Mettre à jour la référence de l'utilisateur
-        userToAdd.rooms.push(roomId);
-        await userToAdd.save({ session });
+        await User.updateOne(
+          { _id: memberId },
+          { $addToSet: { rooms: roomId } },
+          { session }
+        );
 
         await session.commitTransaction();
         session.endSession();
