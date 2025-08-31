@@ -19,11 +19,11 @@ const Hero = () => {
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                      <button className="bg-blue-600 text-white px-8 py-3 rounded hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+                      <button type="button" className="bg-blue-600 text-white px-8 py-3 rounded hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
                         <span><Link to="/login">Commencer Gratuitement</Link></span>
                         <ArrowRight className="w-5 h-5" />
                       </button>
-                      <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
+                      <button type="button" className="border border-gray-300 text-gray-700 px-8 py-3 rounded hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
                         <Play className="w-5 h-5" />
                         <span>Voir la Démo</span>
                       </button>

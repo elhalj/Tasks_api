@@ -12,10 +12,10 @@ const Cta = () => {
             Rejoignez des milliers d'utilisateurs qui ont déjà adopté TaskFlow pour gérer leurs tâches
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-blue-600 px-8 py-3 rounded hover:bg-gray-50 transition-colors font-semibold">
+            <button type="button" className="bg-white text-blue-600 px-8 py-3 rounded hover:bg-gray-50 transition-colors font-semibold">
               Essai Gratuit 14 Jours
             </button>
-            <button className="border border-white text-white px-8 py-3 rounded hover:bg-blue-700 transition-colors">
+            <button type="button" className="border border-white text-white px-8 py-3 rounded hover:bg-blue-700 transition-colors">
               Planifier une Démo
             </button>
           </div>

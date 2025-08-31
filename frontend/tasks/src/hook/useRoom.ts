@@ -12,8 +12,9 @@ export const useRoom = () => {
     return context as { 
         room: Room[]; 
         getRoom: () => Promise<void>;
+        loading: boolean;
         createRoom: (room_name: string, description: string, members: User[]) => Promise<void>;
-        addMember: (roomId: string, memberId: User) => Promise<void>;
+        addMember: (roomId: string, memberId: string) => Promise<void>;
         deleteMemberToRoom: (roomId: string, memberId: string) => Promise<void>;
         updateRoomInformation: (roomId: string, room: Room) => Promise<void>;
         deleteRoom: (roomId: string) => Promise<void>;

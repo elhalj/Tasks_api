@@ -42,6 +42,7 @@ const UtilsBar = ({
         <button
           type="button"
           className="p-2 text-gray-300 hover:text-white transition-colors"
+          onClick={() => alert("Pas encore fonctionnel")}
         >
           <Filter className="w-5 h-5" />
           {/* TODO: Ajouter un tooltip pour expliquer ce que fait ce bouton */}
@@ -52,6 +53,7 @@ const UtilsBar = ({
           className="p-2 text-gray-300 hover:text-white transition-colors"
           aria-label="Calendar view"
           title="Switch to calendar view"
+          onClick={() => alert("Pas encore fonctionnel")}
         >
           <Calendar className="w-5 h-5" />
         </button>

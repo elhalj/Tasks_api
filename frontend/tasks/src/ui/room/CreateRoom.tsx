@@ -4,6 +4,7 @@ import { AuthContext } from "../../context";
 import { useRoom } from "../../hook/useRoom";
 import type { User } from "../../types/user";
 import Loader from "../../components/Loader";
+import toast from "react-hot-toast";
 
 interface RoomFormData {
   room_name: string;
@@ -79,6 +80,7 @@ const CreateRoom = () => {
         formData.members
       );
       
+      toast.success("Créé avec succès")
       // Reset form on success
       setFormData({ room_name: "", description: "", members: [] });
     } catch (error: any) {

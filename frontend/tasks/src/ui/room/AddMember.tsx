@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context";
 import { useRoom } from "../../hook/useRoom";
 import Loader from "../../components/Loader";
+import toast from "react-hot-toast";
 
 const AddMember = ({ roomId }: { roomId: string }) => {
   const { user, getAllUser, loading: authLoading } = useContext(AuthContext);
@@ -31,6 +32,7 @@ const AddMember = ({ roomId }: { roomId: string }) => {
     try {
       setAddingMemberId(userId);
       await addMember(roomId, userId);
+      toast.success("Ajouté avec succès")
       setErrors("")
     } catch (error) {
       setErrors("Erreur lors de l'ajout du membre");
