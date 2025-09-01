@@ -1,5 +1,6 @@
 import io, { Socket } from 'socket.io-client';
-import type { Task, User } from '../context';
+import type { Task } from '../types/task';
+import type { User } from '../types/user';
 
 // Événements de base de la socket
 export interface SocketEvents {
