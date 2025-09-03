@@ -27,7 +27,7 @@ const CreateRoom = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         await getAllUser();
         if (Array.isArray(user)) {
           setAvailableUsers(user);
@@ -36,98 +36,163 @@ const CreateRoom = () => {
         console.error("Error fetching users:", error);
         setErrors("Failed to load users");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
+
     fetchUsers();
-    
+    // const intervalId = setInterval(fetchUsers, 9000);
+
+    // return () => clearInterval(intervalId);
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  //   useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const users = await getAllUser();
+  //       if (Array.isArray(users)) {
+  //         setAvailableUsers(users);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching users:", error);
+  //       setErrors("Failed to load users");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchUsers(); // première exécution immédiate
+  //   const intervalId = setInterval(fetchUsers, 9000);
+
+  //   return () => clearInterval(intervalId);
+  // }, [getAllUser]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const toggleUserSelection = useCallback((selectedUser: User) => {
-    setFormData(prev => {
-      const isAlreadySelected = prev.members.some(member => member._id === selectedUser._id);
-      
+    setFormData((prev) => {
+      const isAlreadySelected = prev.members.some(
+        (member) => member._id === selectedUser._id
+      );
+
       return {
         ...prev,
         members: isAlreadySelected
-          ? prev.members.filter(member => member._id !== selectedUser._id)
-          : [...prev.members, selectedUser]
+          ? prev.members.filter((member) => member._id !== selectedUser._id)
+          : [...prev.members, selectedUser],
       };
     });
-  },[])
+  }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrors("");
-
-    try {
-      if (!formData.room_name.trim()) {
-        throw new Error("Room name is required");
-      }
-
-      await createRoom(
-        formData.room_name,
-        formData.description,
-        formData.members
-      );
-      
-      toast.success("Créé avec succès")
-      // Reset form on success
-      setFormData({ room_name: "", description: "", members: [] });
-    } catch (error: any) {
-      setErrors(error.message || "Failed to create room");
-    } finally {
-      setLoading(false);
+  const validateForm = (room_name: string, description: string) => {
+    if (
+      !room_name ||
+      typeof room_name !== "string" ||
+      room_name.trim().length === 0
+    ) {
+      setErrors("Nom de room requis");
+      return false;
     }
-  },[formData, createRoom]);
+    if (
+      !description ||
+      typeof description !== "string" ||
+      description.trim().length === 0
+    ) {
+      setErrors("Description requis");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true);
+
+      try {
+        if (!validateForm(formData.room_name, formData.description)) {
+          setLoading(false);
+          return;
+        }
+        await createRoom(
+          formData.room_name,
+          formData.description,
+          formData.members
+        );
+
+        toast.success("Créé avec succès");
+        // Reset form on success
+        setFormData({ room_name: "", description: "", members: [] });
+        setErrors("");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setErrors(error.message);
+        } else {
+          setErrors("Failed to create room");
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [formData, createRoom]
+  );
 
   if (loading) {
-    return <Loader/>
+    return <Loader />;
   }
-  return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <Link to="/dashboard">
-        <button
-          type="button"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6"
-        >
-          Retour au dashboard
-        </button>
-      </Link>
 
-      <h1 className="text-3xl font-bold mb-8 text-gray-800">Créer une salle</h1>
-      
+  return (
+    <div className="mx-auto max-w-2xl bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+          Créer une salle
+        </h1>
+        <Link to="/dashboard">
+          <button
+            type="button"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors duration-200"
+          >
+            Retour
+          </button>
+        </Link>
+      </div>
+
+      {/* Message d'erreur */}
       {errors && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+        <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-200">
           {errors}
         </div>
       )}
-      
+
+      {/* Formulaire */}
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Nom de la salle */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">
-            Nom de la salle *
+            Nom de la salle <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             name="room_name"
             value={formData.room_name}
             onChange={handleInputChange}
-            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Entrez le nom de la salle"
             required
           />
         </div>
-        
+
+        {/* Description */}
         <div>
           <label className="block text-gray-700 font-medium mb-2">
             Description
@@ -137,45 +202,66 @@ const CreateRoom = () => {
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Décrivez le but de cette salle"
           />
         </div>
-        
+
+        {/* Membres */}
         <div>
-          <label className="block text-gray-700 font-medium mb-2">
-            Membres *
+          <label className="block text-gray-700 font-medium mb-3">
+            Membres <span className="text-red-500">*</span>
           </label>
-          <div className="max-h-60 overflow-y-auto border border-gray-300 rounded p-2">
-            {loading && (<Loader/>)}
+          <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-xl p-3 space-y-2 shadow-inner">
+            {loading && <Loader />}
             {availableUsers.length > 0 ? (
-              availableUsers.map((user) => (
-                <div 
-                  key={user._id} 
-                  className={`p-2 mb-2 rounded cursor-pointer ${formData.members.some(m => m._id === user._id) 
-                    ? 'bg-blue-100 border border-blue-300' 
-                    : 'hover:bg-gray-100'}`}
-                  onClick={() => toggleUserSelection(user)}
-                >
-                  <div className="font-medium">{user.userName}</div>
-                  <div className="text-sm text-gray-600">{user.email}</div>
-                </div>
-              ))
+              availableUsers.map((user) => {
+                const isSelected = formData.members.some(
+                  (m) => m._id === user._id
+                );
+                return (
+                  <div
+                    key={user._id}
+                    className={`p-3 rounded-lg cursor-pointer flex flex-col transition-colors duration-200 ${
+                      isSelected
+                        ? "bg-blue-100 border border-blue-300"
+                        : "hover:bg-gray-100 border border-transparent"
+                    }`}
+                    onClick={() => toggleUserSelection(user)}
+                  >
+                    <span className="font-semibold text-gray-800">
+                      {user.userName}
+                    </span>
+                    <span className="text-sm text-gray-600">{user.email}</span>
+                  </div>
+                );
+              })
             ) : (
-              <div className="text-gray-500 p-2">Aucun utilisateur disponible</div>
+              <div className="text-gray-500 p-2 text-sm">
+                Aucun utilisateur disponible
+              </div>
             )}
           </div>
         </div>
-        
+
+        {/* Bouton de validation */}
         <div className="flex justify-end">
-          <button 
-            type="submit" 
-            disabled={loading || !formData.room_name.trim()}
-            className={`px-6 py-2 rounded-md text-white font-medium ${loading || !formData.room_name.trim() 
-              ? 'bg-blue-300 cursor-not-allowed' 
-              : 'bg-blue-600 hover:bg-blue-700'}`}
+          <button
+            type="submit"
+            disabled={
+              loading ||
+              !formData.room_name.trim() ||
+              !formData.description.trim()
+            }
+            className={`px-6 py-3 rounded-xl text-white font-semibold shadow-md transition-colors duration-200 ${
+              loading ||
+              !formData.room_name.trim() ||
+              !formData.description.trim()
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            {loading ? 'Création en cours...' : 'Créer la salle'}
+            {loading ? "Création en cours..." : "Créer la salle"}
           </button>
         </div>
       </form>

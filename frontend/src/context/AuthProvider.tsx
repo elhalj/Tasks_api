@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setToken(null);
     setCurrentUser(null);
     setUser([]); // Reset tous les utilisateurs aussi
-    window.location.href = "/";
+    window.location.href = "/login";
   }, []);
 
   const getAllUser = useCallback(async () => {

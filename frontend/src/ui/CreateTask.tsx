@@ -136,126 +136,166 @@ const CreateTask = ({ roomId }: CreateTaskProps) => {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2 w-lg">
-        <label className="flex flex-col">
-          <span className="text-lg font-bold">Titre</span>
-          <input
-            type="text"
-            value={myTask.title}
-            onChange={handleInputChange}
-            name="title"
-            placeholder="Entrez un titre"
-            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </label>
-        <label className="flex flex-col">
-          <span className="text-lg font-bold">Description</span>
-          <textarea
-            value={myTask.description}
-            onChange={handleTextAreaChange}
-            name="description"
-            placeholder="Entrez une description"
-            className="p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </label>
-        <label className="flex flex-col">
-          <span className="text-lg font-bold">Date de fin</span>
-          <input
-            type="date"
-            value={myTask.dueDate}
-            onChange={handleInputChange}
-            name="dueDate"
-            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </label>
-        <label className="flex flex-col">
-          <span className="text-lg font-bold">Estimation (h)</span>
-          <input
-            type="number"
-            value={myTask.estimatedHours}
-            onChange={handleInputChange}
-            name="estimatedHours"
-            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </label>
-        <label className="flex gap-1 items-center">
-          <span className="text-lg font-bold">Completed</span>
+      <form
+  onSubmit={handleSubmit}
+  className="flex flex-col gap-6 w-full max-w-lg mx-auto p-4 sm:p-6 bg-white rounded-2xl shadow-lg"
+>
+  <h2 className="text-2xl font-bold text-gray-800 text-center">
+    Ajouter une tâche
+  </h2>
+
+  {/* Champ Titre */}
+  <label className="flex flex-col gap-2">
+    <span className="text-base font-medium text-gray-700">Titre</span>
+    <input
+      type="text"
+      value={myTask.title}
+      onChange={handleInputChange}
+      name="title"
+      placeholder="Entrez un titre"
+      className="p-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </label>
+
+  {/* Champ Description */}
+  <label className="flex flex-col gap-2">
+    <span className="text-base font-medium text-gray-700">Description</span>
+    <textarea
+      value={myTask.description}
+      onChange={handleTextAreaChange}
+      name="description"
+      placeholder="Entrez une description"
+      rows={3}
+      className="p-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </label>
+
+  {/* Date */}
+  <label className="flex flex-col gap-2">
+    <span className="text-base font-medium text-gray-700">Date de fin</span>
+    <input
+      type="date"
+      value={myTask.dueDate}
+      onChange={handleInputChange}
+      name="dueDate"
+      className="p-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </label>
+
+  {/* Estimation */}
+  <label className="flex flex-col gap-2">
+    <span className="text-base font-medium text-gray-700">Estimation (h)</span>
+    <input
+      type="number"
+      value={myTask.estimatedHours}
+      onChange={handleInputChange}
+      name="estimatedHours"
+      className="p-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </label>
+
+  {/* Completed */}
+  <label className="flex items-center gap-3">
+    <input
+      type="checkbox"
+      checked={myTask.completed}
+      onChange={handleInputChange}
+      name="completed"
+      className="h-5 w-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500"
+    />
+    <span className="text-base font-medium text-gray-700">Terminé</span>
+  </label>
+
+  {/* Status / Priorité / Progress */}
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <label className="flex flex-col gap-2">
+      <span className="text-base font-medium text-gray-700">Status</span>
+      <select
+        value={myTask.status}
+        onChange={handleSelectChange}
+        name="status"
+        className="p-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        {statusTable.map((status) => (
+          <option key={status} value={status}>
+            {status}
+          </option>
+        ))}
+      </select>
+    </label>
+
+    <label className="flex flex-col gap-2">
+      <span className="text-base font-medium text-gray-700">Priorité</span>
+      <select
+        value={myTask.priority}
+        onChange={handleSelectChange}
+        name="priority"
+        className="p-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        {priorityTable.map((priority) => (
+          <option key={priority} value={priority}>
+            {priority}
+          </option>
+        ))}
+      </select>
+    </label>
+
+    <label className="flex flex-col gap-2">
+      <span className="text-base font-medium text-gray-700">Progress</span>
+      <input
+        type="number"
+        value={myTask.progress}
+        onChange={handleInputChange}
+        name="progress"
+        min={0}
+        max={100}
+        className="p-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </label>
+  </div>
+
+  {/* Rooms */}
+  <label className="flex flex-col gap-2">
+    <span className="text-base font-medium text-gray-700">Rooms</span>
+    <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+      {room.map((r) => (
+        <div
+          key={r._id}
+          className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50"
+        >
           <input
             type="checkbox"
-            checked={myTask.completed}
-            onChange={handleInputChange}
-            name="completed"
-            className="mr-2 h-6 w-6 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            checked={myTask.roomId === r._id}
+            onChange={() => r._id && handleRoomChange(r._id)}
+            className="h-5 w-5 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500"
           />
-        </label>
-        <div className="flex gap-2">
-        <label className="flex flex-col">
-          <span className="text-lg font-bold">Status</span>
-          <select
-            value={myTask.status}
-            onChange={handleSelectChange}
-            name="status"
-            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {statusTable.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col">
-          <span className="text-lg font-bold">Priorité</span>
-          <select
-            value={myTask.priority}
-            onChange={handleSelectChange}
-            name="priority"
-            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {priorityTable.map((priority) => (
-              <option key={priority} value={priority}>
-                {priority}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col">
-          <span className="text-lg font-bold">Progress</span>
-          <input
-            type="number"
-            value={myTask.progress}
-            onChange={handleInputChange}
-            name="progress"
-            min={0}
-            max={100}
-            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          </label>
+          <span>{r.room_name}</span>
         </div>
-        <label>RoomList 
-          <div className="flex gap-2 ">
-            {room.map(r => (
-            <div key={r._id}>
-              <input 
-                type="checkbox" 
-                checked={myTask.roomId === r._id}
-                onChange={() => r._id && handleRoomChange(r._id)}
-                className="mr-2 h-6 w-6 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span>{ r.room_name}</span>
-            </div>
-          ))}
-          </div>
-        </label>
-        {errors && (<p className="bg-red-400 text-white p-2 rounded-lg">{ errors}</p>)}
-        <button
-          type="submit"
-          disabled={loading || new Date(myTask.dueDate) <= new Date()}
-          className={` text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${loading || new Date(myTask.dueDate) <= new Date() ? "bg-blue-300 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-700"}`}
-        >
-          {loading ? "Ajout en cours..." : "Ajouter"}
-        </button>
-      </form>
+      ))}
+    </div>
+  </label>
+
+  {/* Errors */}
+  {errors && (
+    <p className="bg-red-500 text-white text-sm p-3 rounded-lg shadow">
+      {errors}
+    </p>
+  )}
+
+  {/* Submit Button */}
+  <button
+    type="submit"
+    disabled={loading || new Date(myTask.dueDate) <= new Date()}
+    className={`w-full text-white font-semibold py-3 rounded-xl shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+      loading || new Date(myTask.dueDate) <= new Date()
+        ? "bg-blue-300 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700"
+    }`}
+  >
+    {loading ? "Ajout en cours..." : "Ajouter la tâche"}
+  </button>
+</form>
+
     </>
   );
 };

@@ -5,7 +5,7 @@ import { useRoom } from "../../hook/useRoom";
 import Loader from "../../components/Loader";
 
 const RoomUI = () => {
-  const { room, getRoom, loading} = useRoom();
+  const { room, getRoom, loading } = useRoom();
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -13,7 +13,7 @@ const RoomUI = () => {
   }, [getRoom]);
 
   if (loading) {
-    return <Loader/>
+    return <Loader />
   }
 
   if (user && room.length === 0) {
@@ -25,46 +25,54 @@ const RoomUI = () => {
   }
 
   const RoomRow = React.memo(() =>
-    room.map((r) => {
-      // Get the first user in the array or undefined if empty
+    room.map((r, index) => {
       const currentUser = user[0];
+
       return (
         <div
           key={r._id}
-          className="text-white p-4 border-2 border-gray-300 rounded-md bg-gradient-to-br from-white/20 to-indigo-300/50 opacity-80 backdrop-blur-lg"
+          className="p-5 rounded-2xl shadow-xl bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300"
         >
-          <h1 className="uppercase text-slate-300 bg-gray-50/10  p-2 rounded-lg">Room: {room.findIndex((room) => room._id === r._id) + 1}</h1>
-          <h3 className="text-2xl">Titre: {r.room_name}</h3>
-          {/* <p>{r.description}</p> */}
-          <div className="flex flex-col">
-            <div className="flex items-center">
-              <span className="text-lg font-bold">Membres :</span>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-sm font-semibold text-slate-400 uppercase tracking-wide">
+              Room {index + 1}
+            </h1>
+            <Link to={`/dashboard/room/${r._id}`}>
+              <button
+                type="button"
+                className="px-4 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300"
+              >
+                Voir
+              </button>
+            </Link>
+          </div>
+
+          {/* Content */}
+          <div>
+            <h3 className="text-xl font-bold text-white mb-1">{r.room_name}</h3>
+            {r.description && (
+              <p className="text-slate-300 text-sm mb-3">{r.description}</p>
+            )}
+
+            <div className="flex items-center text-sm text-slate-400">
+              <span className="font-semibold">Membres :</span>
               <span className="ml-2">
-                {
-                  (r.members || []).filter(
-                    (member) => member._id !== currentUser?._id
-                  ).length
-                }
+                {(r.members || []).filter(
+                  (member) => member._id !== currentUser?._id
+                ).length}
               </span>
-              <Link to={`/dashboard/room/${r._id}`}>
-                <button
-                  type="button"
-                  className="ml-4 px-4 py-1 bg-blue-500/50 hover:bg-blue-700/50 text-white font-bold rounded-md"
-                >
-                  Voir
-                </button>
-              </Link>
             </div>
           </div>
         </div>
       );
     })
   );
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
       <RoomRow />
     </div>
   );
-};
-
+}
 export default RoomUI;

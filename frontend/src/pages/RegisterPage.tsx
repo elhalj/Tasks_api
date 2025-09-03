@@ -1,12 +1,11 @@
-
-import Register from '../ui/register'
+import Register from "../ui/register";
 
 const RegisterPage = () => {
   return (
-    <div className='flex items-center justify-center h-screen'>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 to-indigo-100 p-4">
       <Register />
     </div>
-  )
-}
+  );
+};
 
-export default RegisterPage
+export default RegisterPage;
