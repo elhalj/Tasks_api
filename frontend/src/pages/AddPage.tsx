@@ -13,7 +13,7 @@ const AddTask = () => {
         <div className="text-center">
           <p className="text-lg mb-4">Aucune salle sélectionnée</p>
           <Link
-            to="/rooms" 
+            to="/dashboard/add/room" 
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             Créer une salle
