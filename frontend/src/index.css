@@ -7,7 +7,8 @@
 
 
 body {
-  @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900;
+  /* @apply bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900; */
+  @apply bg-white;
   @apply min-h-screen;
 }
 

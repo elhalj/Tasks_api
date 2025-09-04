@@ -12,7 +12,6 @@ const AddMember = ({ roomId }: { roomId: string }) => {
 
   useEffect(() => {
     const loadUsers = async () => {
-      // Chargement des utilisateurs seulement si le tableau est vide
       if (user.length === 0 && !authLoading) {
         try {
           await getAllUser();
@@ -22,13 +21,11 @@ const AddMember = ({ roomId }: { roomId: string }) => {
         }
       }
     };
-
     loadUsers();
   }, [user.length, getAllUser, authLoading]);
 
   const handleAddMember = async (userId: string) => {
     if (!userId) return;
-
     try {
       setAddingMemberId(userId);
       await addMember(roomId, userId);
@@ -53,10 +50,10 @@ const AddMember = ({ roomId }: { roomId: string }) => {
   }
 
   return (
-    <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 shadow-2xl">
-      <h3 className="text-xl font-bold mb-5 text-slate-100 tracking-wide flex items-center gap-2">
+    <div className="bg-slate-200 backdrop-blur-md rounded-2xl p-2">
+      <h3 className="text-lg font-semibold mb-5 text-black flex items-center gap-2">
         <svg
-          className="w-5 h-5 text-blue-400"
+          className="w-5 h-5 text-purple-400"
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
@@ -68,48 +65,46 @@ const AddMember = ({ roomId }: { roomId: string }) => {
             d="M12 4v16m8-8H4"
           />
         </svg>
-        Add Member
+        Ajouter un membre
       </h3>
 
       {errors && (
-        <div className="mb-4 p-3 bg-red-900/30 border border-red-800/50 rounded-lg text-red-400 text-sm shadow-inner">
+        <div className="mb-4 p-3 bg-red-900/40 border border-red-800/60 rounded-lg text-red-300 text-sm shadow-inner">
           {errors}
         </div>
       )}
 
-      <div className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+      <div className="space-y-3 max-h-72 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
         {user && user.length > 0 ? (
           user.map((u) => (
             <div
               key={u._id}
-              className="flex justify-between items-center p-3 rounded-xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 hover:from-slate-800/60 hover:to-slate-900/60 transition-all duration-200 border border-slate-700/30 group"
+              className="flex flex-col bg-slate-300 gap-2 p-1 rounded-xl  hover:bg-slate-800 transition-all duration-200 "
             >
               {/* Avatar + Infos */}
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shadow-md group-hover:scale-105 transition-transform duration-200">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold shadow-md">
                   {u.userName?.charAt(0).toUpperCase() ||
                     u.email?.charAt(0).toUpperCase() ||
                     "U"}
                 </div>
                 <div>
-                  <p className="font-medium text-slate-100 text-sm">
-                    {u.userName}
-                  </p>
-                  <p className="text-xs text-slate-400">{u.email}</p>
+                  <p className="font-medium text-slate-700 text-sm">{u.userName}</p>
+                  <p className="text-xs text-slate-600">{u.email}</p>
                 </div>
               </div>
 
               {/* Bouton Add */}
               <button
                 type="button"
-                className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-medium rounded-lg hover:from-purple-700 hover:to-blue-700 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 disabled={addingMemberId === u._id}
                 onClick={() => u._id && handleAddMember(u._id)}
               >
                 {addingMemberId === u._id ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Adding...
+                    Ajout...
                   </>
                 ) : (
                   <>
@@ -126,7 +121,7 @@ const AddMember = ({ roomId }: { roomId: string }) => {
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                    Add
+                    Ajouter
                   </>
                 )}
               </button>

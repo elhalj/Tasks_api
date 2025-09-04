@@ -65,7 +65,7 @@ const RoomId = () => {
       case "completed":
         return "bg-emerald-900/30 text-emerald-400 border-emerald-800/50";
       case "in_progress":
-        return "bg-blue-900/30 text-blue-400 border-blue-800/50";
+        return "bg-blue-300 text-blue-400 border-blue-800/50";
       case "done":
         return "bg-green-900/30 text-blue-400 border-green-800/50";
       default:
@@ -135,7 +135,7 @@ const RoomId = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -147,7 +147,7 @@ const RoomId = () => {
               <ArrowLeft className="w-4 h-4" />
               <span className="font-medium">Dashboard</span>
             </Link>
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent uppercase">
               {currentRoom.room_name}
             </h1>
           </div>
@@ -175,16 +175,16 @@ const RoomId = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             {/* Room Info */}
-            <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 shadow-xl">
+            <div className="bg-slate-200 backdrop-blur-sm rounded-2xl p-2  hover:border-slate-600/50 transition-all duration-300 shadow-xl">
               <div className="flex items-start gap-3 mb-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
                   <Activity className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="font-semibold text-slate-100">
+                  <h2 className="font-semibold text-slate-700">
                     {currentRoom.room_name}
                   </h2>
-                  <p className="text-sm text-slate-400 mt-1">
+                  <p className="text-sm text-slate-700 mt-1">
                     {currentRoom.description}
                   </p>
                 </div>
@@ -192,12 +192,12 @@ const RoomId = () => {
             </div>
 
             {/* Team Members */}
-            <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 shadow-xl">
+            <div className="bg-slate-200 backdrop-blur-sm rounded-2xl p-2  hover:border-slate-600/50 transition-all duration-300 shadow-xl">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-slate-100 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-slate-400" /> Team Members
+                <h3 className="font-semibold text-slate-700 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-slate-700" /> Team Members
                 </h3>
-                <span className="text-sm text-slate-400">
+                <span className="text-sm text-slate-700">
                   {currentRoom.members?.length || 0}
                 </span>
               </div>
@@ -214,7 +214,7 @@ const RoomId = () => {
                           "U"}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-100 text-sm">
+                        <p className="font-medium text-slate-700 text-sm">
                           {member.userName || member.email}
                         </p>
                         <p className="text-xs text-slate-500">
@@ -235,25 +235,25 @@ const RoomId = () => {
             </div>
 
             {/* Quick Stats */}
-            <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 shadow-xl">
-              <h3 className="font-semibold text-slate-100 mb-4">Quick Stats</h3>
+            <div className="bg-slate-300 backdrop-blur-sm rounded-2xl p-2 hover:border-slate-600/50 transition-all duration-300">
+              <h3 className="font-semibold text-slate-700 mb-4">Quick Stats</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Total Tasks</span>
-                  <span className="font-semibold text-slate-100">
+                  <span className="text-slate-700">Total Tasks</span>
+                  <span className="font-semibold text-slate-700">
                     {currentRoom.tasks?.length || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Completed</span>
-                  <span className="font-semibold text-emerald-400">
+                  <span className="text-slate-600">Completed</span>
+                  <span className="font-semibold text-emerald-600">
                     {currentRoom.tasks?.filter((t) => t.status === "completed")
                       .length || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">In Progress</span>
-                  <span className="font-semibold text-blue-400">
+                  <span className="text-slate-600">In Progress</span>
+                  <span className="font-semibold text-blue-600">
                     {currentRoom.tasks?.filter(
                       (t) => t.status === "in-progress"
                     ).length || 0}
@@ -266,8 +266,8 @@ const RoomId = () => {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">
             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-              <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
-                <CheckCircle2 className="w-7 h-7 text-blue-400" /> Tasks
+              <h2 className="text-2xl font-bold text-slate-700 flex items-center gap-3">
+                <CheckCircle2 className="w-7 h-7 text-blue-600" /> Tasks
               </h2>
               <Link
                 to={"/dashboard/add/task"}
@@ -282,7 +282,7 @@ const RoomId = () => {
                 {currentRoom.tasks.map((task) => (
                   <div
                     key={task._id}
-                    className="group bg-slate-900/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 cursor-pointer shadow-xl"
+                    className="group bg-slate-200 backdrop-blur-sm rounded-2xl p-2 hover:border-slate-600/50 transition-all duration-300 cursor-pointer shadow-md"
                   >
                     <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
                       <div className="flex-1">
@@ -292,11 +292,11 @@ const RoomId = () => {
                               task.priority || "low"
                             )}`}
                           ></div>
-                          <h3 className="font-semibold text-slate-100 group-hover:text-blue-400 transition-colors">
+                          <h3 className="font-semibold text-slate-700 group-hover:text-blue-400 transition-colors">
                             {task.title || "Sans titre"}
                           </h3>
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                            className={`px-3 py-1 rounded-full text-xs text-slate-700 font-medium border ${getStatusColor(
                               task.status || "todo"
                             )} flex items-center gap-1`}
                           >
@@ -304,13 +304,13 @@ const RoomId = () => {
                             {(task.status || "todo").replace("-", " ")}
                           </span>
                         </div>
-                        <p className="text-slate-400 leading-relaxed">
+                        <p className="text-slate-700 leading-relaxed uppercase">
                           {task.description || "Aucune description"}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         {task.dueDate && (
-                          <div className="flex items-center gap-1 text-slate-500">
+                          <div className="flex items-center gap-1 text-slate-600 bg-gray-200 border border-black p-1 rounded-md">
                             <Calendar className="w-4 h-4" />
                             <span className="text-sm">
                               {new Date(task.dueDate).toLocaleDateString()}
@@ -320,6 +320,7 @@ const RoomId = () => {
                         <button
                           type="button"
                           className="p-2 rounded-lg hover:bg-slate-800/50 transition-colors duration-200"
+                          onClick={() => alert("Pas encore fonctionnel")}
                         >
                           <Star className="w-4 h-4 text-slate-500 hover:text-yellow-400" /> { }
                         </button>
@@ -329,14 +330,14 @@ const RoomId = () => {
                 ))}
               </div>
             ) : (
-              <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-12 text-center border border-slate-700/50 shadow-xl">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-slate-500" />
+              <div className="bg-slate-300 backdrop-blur-sm rounded-2xl p-12 text-center shadow-md">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-200 border border-slate-700/50 flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-100 mb-2">
+                <h3 className="text-xl font-semibold text-slate-700 mb-2">
                   No tasks yet
                 </h3>
-                <p className="text-slate-400 mb-6">
+                <p className="text-slate-700 mb-6">
                   Get started by creating your first task for this room.
                 </p>
                 <Link
