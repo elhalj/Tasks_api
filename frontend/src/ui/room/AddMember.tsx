@@ -4,6 +4,14 @@ import { useRoom } from "../../hook/useRoom";
 import Loader from "../../components/Loader";
 import toast from "react-hot-toast";
 
+type ApiError = Error & {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string
+    }
+  }
+}
 const AddMember = ({ roomId }: { roomId: string }) => {
   const { user, getAllUser, loading: authLoading } = useContext(AuthContext);
   const { addMember } = useRoom();
@@ -32,7 +40,13 @@ const AddMember = ({ roomId }: { roomId: string }) => {
       toast.success("Ajouté avec succès");
       setErrors("");
     } catch (error) {
-      setErrors("Erreur lors de l'ajout du membre");
+      const apiError = error as ApiError;
+      const errorMessage =  apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message || "Failed to create";
+      setErrors(`Error: ${errorMessage}`);
+      setTimeout(() => {setErrors("")},3000)
+      
       console.error("Error adding member:", error);
     } finally {
       setAddingMemberId(null);
@@ -69,7 +83,7 @@ const AddMember = ({ roomId }: { roomId: string }) => {
       </h3>
 
       {errors && (
-        <div className="mb-4 p-3 bg-red-900/40 border border-red-800/60 rounded-lg text-red-300 text-sm shadow-inner">
+        <div className="mb-4 p-3 bg-red-900/40 border border-red-800/60 rounded-lg text-white text-sm shadow-inner">
           {errors}
         </div>
       )}

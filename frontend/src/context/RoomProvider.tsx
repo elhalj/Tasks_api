@@ -4,6 +4,7 @@ import type { Room } from "../types/room";
 import instance from "../services/api";
 import type { User } from "../types/user";
 import { RoomContext } from "./RoomContext";
+import toast from "react-hot-toast";
 
 
 interface RoomProviderProps {
@@ -212,6 +213,7 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
 
       setRoom((prev) => prev.filter((r) => r._id !== roomId));
       setErrors(null);
+      toast.success("Supprimé")
       return res.data.message;
     } catch (error) {
       const apiError = error as ApiError;
@@ -221,6 +223,7 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
         apiError.message ||
         "Failed to delete room";
       setErrors(`Error: ${errorMessage}`);
+      toast.error(errorMessage)
       console.error("Error deleting room:", error);
       throw error;
     } finally {
