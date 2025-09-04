@@ -81,6 +81,22 @@ export const roomRoutes = async (fastify, options) => {
           });
         }
 
+        if (room_name.trim().length < 3) {
+          return reply.code(401).send({
+            success: false,
+            message: "Le nom doit depasser 3 charactères",
+          });
+        }
+
+        if (description.trim().length < 10) {
+          return reply
+            .code(401)
+            .send({
+              success: false,
+              message: "La description doit depasser 10 charactères",
+            });
+        }
+
         session.startTransaction();
 
         // Vérifier les membres (sans doublons et sans l’admin)

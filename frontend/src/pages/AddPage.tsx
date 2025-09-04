@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRoom } from "../hook/useRoom";
 import CreateTask from "../ui/CreateTask";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 const AddTask = () => {
   const { room: rooms } = useRoom();
@@ -31,12 +31,12 @@ const AddTask = () => {
       <h1 className="text-2xl font-bold text-gray-800">
         Gestion des tâches
       </h1>
-      <Link
+      <NavLink
         to="/dashboard"
         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors duration-200"
       >
         Retour
-      </Link>
+      </NavLink>
     </div>
 
     {/* Sélection de salle */}

@@ -24,7 +24,7 @@ const Tasks = ({ viewMode }: { viewMode: string }) => {
         <p className="text-gray-400 mb-6">
           Créez votre première tâche pour commencer !
         </p>
-        <Link to="/dashboard/tasks/create">
+        <Link to="/dashboard/add/task">
           <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2">
             <Plus className="w-5 h-5" />
             Créer une tâche

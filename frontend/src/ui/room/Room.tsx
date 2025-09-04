@@ -1,18 +1,28 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context";
 import { Link } from "react-router-dom";
 import { useRoom } from "../../hook/useRoom";
 import Loader from "../../components/Loader";
 
+type ApiError = Error & {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string
+    }
+  }
+}
 const RoomUI = () => {
-  const { room, getRoom, deleteRoom, loading } = useRoom();
+  const { room, getRoom, deleteRoom, loading: load } = useRoom();
   const { user } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState("")
 
   useEffect(() => {
     getRoom();
   }, [getRoom]);
 
-  if (loading) {
+  if (load) {
     return <Loader />;
   }
 
@@ -25,9 +35,21 @@ const RoomUI = () => {
   }
 
   const handleDeleteRoom = (id: string | undefined) => {
-    if (id) {
+    setLoading(true)
+   try {
+     if (id) {
       deleteRoom(id);
-    }
+     }
+     setErrors("")
+   } catch (error) {
+    const apiError = error as ApiError;
+      const errorMessage =  apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message || "Failed to create";
+      setErrors(`Error: ${errorMessage}`);
+   } finally {
+     setLoading(false)
+   }
   };
 
   const RoomRow = React.memo(() =>
@@ -38,6 +60,7 @@ const RoomUI = () => {
           key={r._id}
           className="p-2 rounded-2xl shadow-xl bg-slate-200 hover:border-slate-600/50 transition-all duration-300"
         >
+          {errors && (<div className="bg-red-300 text-white border border-red-600 p-1 rounded-md">{ errors}</div>)}
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
@@ -85,6 +108,7 @@ const RoomUI = () => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      {loading && <Loader/>}
       <RoomRow />
     </div>
   );

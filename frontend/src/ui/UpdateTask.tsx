@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, NavLink, useParams } from "react-router-dom";
 import { TaskContext } from "../context";
 
 interface TaskProps {
@@ -94,12 +94,12 @@ const UpdateTask = () => {
     <div className="p-6 max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-200">
       {/* Retour */}
       <div className="mb-4">
-        <Link
+        <NavLink
           to="/dashboard"
           className="inline-block text-gray-600 hover:text-blue-600 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
         >
           ← Retour au tableau de bord
-        </Link>
+        </NavLink>
       </div>
 
       {/* Titre */}

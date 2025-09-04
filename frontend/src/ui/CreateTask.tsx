@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { TaskContext } from "../context";
 import { useRoom } from "../hook/useRoom";
+import toast from "react-hot-toast";
 
 interface TaskProps {
   title: string;
@@ -17,12 +18,21 @@ interface CreateTaskProps {
   roomId?: string;
 }
 
+type ApiError = Error & {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string;
+    };
+  };
+};
+
 const statusTable = ["pending", "in_progress", "done", "canceled"];
 const priorityTable = ["low", "medium", "high", "critical"];
 
 const CreateTask = ({ roomId }: CreateTaskProps) => {
   const { addTask } = useContext(TaskContext);
-  const { room, getRoom } = useRoom()
+  const { getRoom } = useRoom()
   useEffect(() => {
     getRoom()
   },[getRoom])
@@ -69,12 +79,12 @@ const CreateTask = ({ roomId }: CreateTaskProps) => {
     setMyTask((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRoomChange = (roomId: string) => {
-    setMyTask(prev => ({
-      ...prev,
-      roomId: prev.roomId === roomId ? undefined : roomId
-    }));
-  };
+  // const handleRoomChange = (roomId: string) => {
+  //   setMyTask(prev => ({
+  //     ...prev,
+  //     roomId: prev.roomId === roomId ? undefined : roomId
+  //   }));
+  // };
 
   const validateForm = (title: string, description: string, dueDate: string) => {
     if (!title || typeof title !== "string" || title.trim().length < 3) {
@@ -115,6 +125,7 @@ const CreateTask = ({ roomId }: CreateTaskProps) => {
         myTask.priority,
         myTask.progress
       );
+      toast.success("Ajouté avec succès")
       setMyTask({ 
         title: "", 
         description: "",
@@ -125,9 +136,12 @@ const CreateTask = ({ roomId }: CreateTaskProps) => {
         priority: "low", 
         progress: 0 
       });
-    } catch (error: any) {
-      console.error(error);
-      setErrors(error.toString())
+    } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage =  apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message || "Failed to create";
+      setErrors(`Error: ${errorMessage}`)
     } finally {
       setLoading(false);
     }
@@ -255,7 +269,7 @@ const CreateTask = ({ roomId }: CreateTaskProps) => {
   </div>
 
   {/* Rooms */}
-  <label className="flex flex-col gap-2">
+  {/* <label className="flex flex-col gap-2">
     <span className="text-base font-medium text-gray-700">Rooms</span>
     <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
       {room.map((r) => (
@@ -273,7 +287,7 @@ const CreateTask = ({ roomId }: CreateTaskProps) => {
         </div>
       ))}
     </div>
-  </label>
+  </label> */}
 
   {/* Errors */}
   {errors && (

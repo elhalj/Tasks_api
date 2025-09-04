@@ -16,6 +16,25 @@ export const authRoute = async (fastify) => {
       return reply.code(400).send({ error: "User exist" });
     }
 
+    if (
+      !userName ||
+      typeof userName !== "string" ||
+      userName.trim().length === 0
+    ) {
+      return reply
+        .code(401)
+        .send({ success: false, message: "Le nom est requis" });
+    }
+
+    if (userName.trim().length <= 3) {
+      return reply
+        .code(401)
+        .send({
+          success: false,
+          message: "Le nom doit au moins depasser 3 charactères",
+        });
+    }
+
     const user = new User({ userName, email, password });
     await user.save();
     return { message: "User registred successfully..." };

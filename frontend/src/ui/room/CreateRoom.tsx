@@ -12,6 +12,15 @@ interface RoomFormData {
   members: User[];
 }
 
+type ApiError = Error & {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string;
+    };
+  };
+};
+
 const CreateRoom = () => {
   const { user, getAllUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
@@ -133,12 +142,13 @@ const CreateRoom = () => {
         // Reset form on success
         setFormData({ room_name: "", description: "", members: [] });
         setErrors("");
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          setErrors(error.message);
-        } else {
-          setErrors("Failed to create room");
-        }
+      } catch (error) {
+        const apiError = error as ApiError;
+        const errorMessage =
+          apiError.response?.data?.error ||
+          apiError.response?.data?.message ||
+          apiError.message;
+        setErrors(`Error: ${errorMessage}`);
       } finally {
         setLoading(false);
       }

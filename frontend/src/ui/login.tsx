@@ -8,6 +8,15 @@ interface LoginForm {
   password: string;
 }
 
+type ApiError = Error & {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string
+    }
+  }
+}
+
 const Login = () => {
   const [formData, setFormData] = useState<LoginForm>({
     email: "",
@@ -56,11 +65,9 @@ const Login = () => {
       toast.success("Connecté avec succès");
       navigate("/dashboard");
     } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      } else {
-        console.error("Une erreur est survenue lors de la connexion");
-      }
+      const apiError = error as ApiError
+      const errorMessage = apiError.response?.data?.message || apiError.response?.data?.error || "Connexion Error"
+      setError(`Erreur ${errorMessage}`)
       toast.error("Erreur de connexion");
     } finally {
       setLoading(false);

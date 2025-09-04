@@ -65,12 +65,12 @@ const UtilsBar = ({
         </button>
 
         {/* Changer le mode d'affichage */}
-        <div className="flex bg--slatetext-shadow-slate-700/10 rounded-lg p-1">
+        <div className="flex bg-slate-700/10 rounded-lg p-1">
           <button
             type="button"
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded ${
-              viewMode === "grid" ? "bg--slatetext-shadow-slate-700/20 text-shadow-slate-700" : "text-gray-300"
+              viewMode === "grid" ? "bg-slate-700/20 text-shadow-slate-700" : "text-gray-300"
             } transition-all`}
             title="Vue grille"
           >
