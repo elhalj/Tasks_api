@@ -67,48 +67,43 @@ export const roomRoutes = async (fastify, options) => {
   // Create a new room
   fastify.post(
     "/add/rooms",
-    {
-      preHandler: fastify.authenticate,
-    },
+    { preHandler: fastify.authenticate },
     async (request, reply) => {
       const { room_name, description, members = [] } = request.body;
       const adminId = request.user.userId;
       const session = await mongoose.startSession();
 
       try {
+        if (!room_name || !room_name.trim()) {
+          return reply.code(400).send({
+            success: false,
+            message: "Le nom de la salle est requis.",
+          });
+        }
+
         session.startTransaction();
 
-        // Vérifier que les membres existent et ne pas s'inclure soi-même
-        const memberIds = [...new Set(members)]; // Éviter les doublons
-
-        // Exclure l'admin des membres s'il est présent
-        const membersToAdd = memberIds.filter(
-          (id) => id !== adminId.toString()
-        );
-
-        // Vérifier que les membres existent
+        // Vérifier les membres (sans doublons et sans l’admin)
+        const memberIds = [...new Set(members)];
         const existingMembers = await User.find({
-          _id: { $in: membersToAdd },
-          _id: { $ne: adminId }, // Ne pas inclure l'admin
+          $and: [{ _id: { $in: memberIds } }, { _id: { $ne: adminId } }],
         })
           .select("_id")
           .session(session);
 
-        const existingMemberIds = existingMembers.map((member) => member._id);
+        const existingMemberIds = existingMembers.map((m) => m._id);
 
-        // Créer la salle avec l'admin comme premier membre
-        const roomData = {
+        // Créer la salle
+        const room = new Room({
           room_name: room_name.trim(),
           description: description ? description.trim() : "",
           admin: adminId,
-          members: [...existingMemberIds, adminId], // Inclure l'admin dans les membres
+          members: [...existingMemberIds, adminId],
           isActive: true,
-        };
-
-        const room = new Room(roomData);
+        });
         await room.save({ session });
 
-        // Mettre à jour les références des utilisateurs
+        // Mettre à jour les utilisateurs liés (admin + membres)
         await User.updateMany(
           { _id: { $in: [...existingMemberIds, adminId] } },
           { $addToSet: { rooms: room._id } },
@@ -121,8 +116,6 @@ export const roomRoutes = async (fastify, options) => {
         const populatedRoom = await Room.findById(room._id)
           .populate("admin", "userName email avatar")
           .populate("members", "userName email avatar");
-
-        // Ici, vous pourriez ajouter des notifications aux membres ajoutés
 
         return reply.code(201).send({
           success: true,

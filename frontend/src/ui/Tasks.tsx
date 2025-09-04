@@ -58,13 +58,13 @@ const Tasks = ({ viewMode }: { viewMode: string }) => {
               >
                 {task.priority}
               </span>
-              <span className="bg-gray-800/40 text-red-400 px-2 py-1 rounded-lg text-xs">
+              <span className="bg-gray-300/40 text-slate-700 px-2 py-1 rounded-lg text-xs">
                 Échéance: {new Date(task.dueDate).toLocaleDateString("fr-FR")}
               </span>
             </div>
             <button
               type="button"
-              className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-white transition-all"
+              className="opacity-0 group-hover:opacity-100 p-1 text-gray-700 hover:text-white transition-all"
             >
               <MoreHorizontal className="w-5 h-5" />
               {}
@@ -72,10 +72,10 @@ const Tasks = ({ viewMode }: { viewMode: string }) => {
           </div>
 
           {/* Title & description */}
-          <h3 className="text-lg font-bold text-white mb-2 line-clamp-2">
-            {task.title}
+          <h3 className="text-lg font-bold text-gray-600 mb-2 line-clamp-2">
+            Titre: {task.title}
           </h3>
-          <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+          <p className="text-gray-700 text-sm mb-4 line-clamp-2">
             {task.description}
           </p>
 
@@ -87,7 +87,7 @@ const Tasks = ({ viewMode }: { viewMode: string }) => {
             </div>
             <div className="w-full bg-gray-700 rounded-full h-2">
               <div
-                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all duration-500"
+                className="bg-blue-300 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${task.progress}%` }}
               ></div>
             </div>

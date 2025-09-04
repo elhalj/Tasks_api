@@ -14,25 +14,25 @@ const Main = () => {
     window.location.href = "/login";
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex justify-center py-10 px-4">
-      <div className="w-full max-w-7xl bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-6 space-y-8">
+    <div className="min-h-screen bg-white flex justify-center py-10 px-4">
+      <div className="w-full max-w-7xl bg-white   space-y-8">
         {/* Barre d'outils */}
-        <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg">
+        <div >
           <UtilsBar viewMode={viewMode} setViewMode={setViewMode} />
         </div>
 
         {/* Tâches */}
-        <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg">
+        <div>
           <Tasks viewMode={viewMode} />
         </div>
 
         {/* Rooms */}
-        <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg">
+        <div>
           <Room />
         </div>
 
         {/* Stats */}
-        <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-4 border border-slate-700/50 shadow-lg">
+        <div>
           <Stats tasks={tasks} />
         </div>
       </div>

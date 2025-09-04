@@ -14,6 +14,15 @@ interface TaskProviderProps {
   children: React.ReactNode;
 }
 
+type ApiError = Error & {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string;
+    };
+  };
+};
+
 export const TaskProvider = ({ children }: TaskProviderProps) => {
   const { user } = useContext(AuthContext);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -30,7 +39,13 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       setTasks(res.data.tasks);
       setError(null);
     } catch (error) {
-      setError("Failed to fetch tasks");
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to get task";
+      setError(`Error: ${errorMessage}`);
       console.error("Error fetching tasks:", error);
     } finally {
       setLoading(false);
@@ -68,8 +83,13 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
         setError(null);
         return res.data;
       } catch (error) {
-        const errorMessage = "Failed to add task";
-        setError(errorMessage);
+        const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to add Task";
+      setError(`Error: ${errorMessage}`);
         console.error(errorMessage, error);
         throw error;
       }
@@ -87,11 +107,14 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       setError(null);
       toast.success("Tâche mise à jour avec succès");
       return res.data;
-    } catch (error: any) {
+    } catch (error) {
+     const apiError = error as ApiError;
       const errorMessage =
-        error.response?.data?.error || "Échec de la mise à jour de la tâche";
-      setError(errorMessage);
-      toast.error(errorMessage);
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to update";
+      setError(`Error: ${errorMessage}`);
       console.error("Update task error:", error);
       throw error;
     }
@@ -103,8 +126,13 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       const res = await instance.get(`/get/task/${id}`);
       return res.data;
     } catch (error) {
-      const errorMessage = `Failed to fetch task with id ${id}`;
-      setError(errorMessage);
+     const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to get";
+      setError(`Error: ${errorMessage}`);
       console.error(errorMessage, error);
       return null;
     }
@@ -117,11 +145,14 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       setTasks((prevTasks) => prevTasks.filter((task) => task._id !== id));
       setError(null);
       toast.success("Tâche supprimée avec succès");
-    } catch (error: any) {
+    } catch (error) {
+     const apiError = error as ApiError;
       const errorMessage =
-        error.response?.data?.error || "Échec de la suppression de la tâche";
-      setError(errorMessage);
-      toast.error(errorMessage);
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to Delete";
+      setError(`Error: ${errorMessage}`);
       console.error("Delete task error:", error);
       throw error;
     }

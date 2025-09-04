@@ -17,7 +17,7 @@ const UtilsBar = ({
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-0 mb-6">
       {/* Titre et boutons d'ajout */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 gap-2 sm:gap-0">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white">
+        <h2 className="text-2xl sm:text-3xl font-bold text-shadow-slate-700">
           Mes Tâches
         </h2>
 
@@ -25,7 +25,7 @@ const UtilsBar = ({
           {/* Ajouter une tâche */}
           <Link
             to="/dashboard/add/task"
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             <Plus className="w-4 h-4" />
             <span>Ajouter une tâche</span>
@@ -34,7 +34,7 @@ const UtilsBar = ({
           {/* Ajouter une room */}
           <Link
             to="/dashboard/add/room"
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             <Plus className="w-4 h-4" />
             <span>Ajouter une room</span>
@@ -47,7 +47,7 @@ const UtilsBar = ({
         {/* Filtrer */}
         <button
           type="button"
-          className="p-2 text-gray-300 hover:text-white rounded-lg hover:bg-white/10 transition-all"
+          className="p-2 text-gray-300 hover:text-shadow-slate-700 rounded-lg hover:bg--slatetext-shadow-slate-700/10 transition-all"
           onClick={() => alert("Pas encore fonctionnel")}
           title="Filtrer les tâches"
         >
@@ -57,7 +57,7 @@ const UtilsBar = ({
         {/* Vue calendrier */}
         <button
           type="button"
-          className="p-2 text-gray-300 hover:text-white rounded-lg hover:bg-white/10 transition-all"
+          className="p-2 text-gray-300 hover:text-shadow-slate-700 rounded-lg hover:bg--slatetext-shadow-slate-700/10 transition-all"
           title="Vue calendrier"
           onClick={() => alert("Pas encore fonctionnel")}
         >
@@ -65,12 +65,12 @@ const UtilsBar = ({
         </button>
 
         {/* Changer le mode d'affichage */}
-        <div className="flex bg-white/10 rounded-lg p-1">
+        <div className="flex bg--slatetext-shadow-slate-700/10 rounded-lg p-1">
           <button
             type="button"
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded ${
-              viewMode === "grid" ? "bg-white/20 text-white" : "text-gray-300"
+              viewMode === "grid" ? "bg--slatetext-shadow-slate-700/20 text-shadow-slate-700" : "text-gray-300"
             } transition-all`}
             title="Vue grille"
           >
@@ -80,7 +80,7 @@ const UtilsBar = ({
             type="button"
             onClick={() => setViewMode("list")}
             className={`p-2 rounded ${
-              viewMode === "list" ? "bg-white/20 text-white" : "text-gray-300"
+              viewMode === "list" ? "bg--slatetext-shadow-slate-700/20 text-shadow-slate-700" : "text-gray-300"
             } transition-all`}
             title="Vue liste"
           >

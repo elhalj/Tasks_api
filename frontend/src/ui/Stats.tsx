@@ -42,12 +42,12 @@ const Stats = ({ tasks }: { tasks: Task[] }) => {
         {stats.map((stat, index) => (
           <div
             key={index}
-            className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl"
+            className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-300 text-sm">{stat.label}</p>
-                <p className="text-3xl font-extrabold text-white mt-1">
+                <p className="text-gray-600 text-sm">{stat.label}</p>
+                <p className="text-3xl font-extrabold text-slate-400 mt-1">
                   {stat.value}
                 </p>
               </div>

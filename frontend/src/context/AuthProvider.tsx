@@ -3,6 +3,16 @@ import { AuthContext } from "./AuthContext";
 import instance from "../services/api";
 import type { User } from "../types/user";
 
+
+type ApiError = Error & {
+  response?: {
+    data?: {
+      error?: string;
+      message?: string;
+    };
+  };
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Séparation entre l'utilisateur connecté et tous les utilisateurs
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -11,6 +21,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.getItem("token")
   );
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState("")
 
   // Essaye de récupérer l'utilisateur connecté stocké en local
   useEffect(() => {
@@ -61,6 +72,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setToken(token);
       localStorage.setItem("token", token);
     } catch (error) {
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed login";
+      setError(`Error: ${errorMessage}`);
       console.error("Login failed:", error);
       throw error;
     } finally {
@@ -81,6 +99,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setCurrentUser(user);
         // Note: Pas de token automatique après registration selon votre logique
       } catch (error) {
+         const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed register";
+      setError(`Error: ${errorMessage}`);
         console.error("Registration failed:", error);
         throw error;
       } finally {
@@ -113,7 +138,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.error("API ne retourne pas un array:", res.data);
         setUser([]);
       }
-    } catch (error: any) {
+    } catch (error) {
+       const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Failed to get User";
+      setError(`Error: ${errorMessage}`);
       console.error("Erreur getAllUser:", error);
       setUser([]);
       throw error;
@@ -131,7 +163,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         register, 
         logout, 
         getAllUser, 
-        loading 
+        loading,
+        error
       }}
     >
       {children}

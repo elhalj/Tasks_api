@@ -7,6 +7,7 @@ export interface AuthContextType {
     user: User[];
     currentUser: User | null;
     loading: boolean;
+    error: string;
     login: (email: string, password: string) => Promise<void>;
     register: (userName: string, email: string, password: string) => Promise<void>;
     logout: () => void;
@@ -20,5 +21,6 @@ export const AuthContext = createContext<AuthContextType>({
     register: async () => {},
     logout: () => { },
     getAllUser: async () => { },
-    loading: false
+    loading: false,
+    error:""
 });
