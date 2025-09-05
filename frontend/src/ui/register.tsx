@@ -1,7 +1,8 @@
-import React, { useContext, useState } from "react";
-import { AuthContext } from "../context";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import type { ApiError } from "../types/apiError";
+import { useAuth } from "../hook";
 
 interface RegisterForm {
   userName: string;
@@ -10,7 +11,7 @@ interface RegisterForm {
 }
 
 const Register = () => {
-  const { register } = useContext(AuthContext);
+  const { register } = useAuth();
   const [formData, setFormData] = useState<RegisterForm>({
     userName: "",
     email: "",
@@ -74,16 +75,18 @@ const Register = () => {
       toast.success("Enregistré avec succès");
       navigate("/login");
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error("Registration failed:", error.message);
-      } else {
-        console.error("An unknown error occurred during registration");
-      }
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.message ||
+        apiError.response?.data?.error ||
+        "Failed to Register";
+      setError(`Error: ${errorMessage}`);
       toast.error("Erreur, Reessayez");
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <div className="flex items-center justify-center min-h-screen px-4">
       <form

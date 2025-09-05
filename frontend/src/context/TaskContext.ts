@@ -40,5 +40,5 @@ export const TaskContext = createContext<TaskProps>({
   updateTask: async () => {},
   deleteTask: async () => {},
   viewTaskDetails: () => {},
-  leaveTaskDetails: () => {},
+  leaveTaskDetails: () => { },
 });

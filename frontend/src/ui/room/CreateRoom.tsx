@@ -1,10 +1,11 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../../context";
 import { useRoom } from "../../hook/useRoom";
 import type { User } from "../../types/user";
 import Loader from "../../components/Loader";
 import toast from "react-hot-toast";
+import type { ApiError } from "../../types/apiError";
+import { useAuth } from "../../hook";
 
 interface RoomFormData {
   room_name: string;
@@ -12,17 +13,8 @@ interface RoomFormData {
   members: User[];
 }
 
-type ApiError = Error & {
-  response?: {
-    data?: {
-      error?: string;
-      message?: string;
-    };
-  };
-};
-
 const CreateRoom = () => {
-  const { user, getAllUser } = useContext(AuthContext);
+  const { user, getAllUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<RoomFormData>({
     room_name: "",

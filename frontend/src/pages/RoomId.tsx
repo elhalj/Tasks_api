@@ -14,6 +14,9 @@ import {
   MoreVertical,
   Star,
   Activity,
+  MoreHorizontal,
+  CircleAlertIcon,
+  History,
 } from "lucide-react";
 import AddMember from "../ui/room/AddMember";
 import { AuthContext } from "../context";
@@ -101,6 +104,21 @@ const RoomId = () => {
     }
   };
 
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case "low":
+        return <MoreHorizontal className="w-4 h-4" />;
+      case "high":
+        return <CircleAlertIcon className="w-4 h-4" />;
+      case "medium":
+        return <MoreVertical className="w-4 h-4" />;
+      case "critical":
+        return <History className="w-4 h-4" />;
+      default:
+        return <Plus className="w-4 h-4" />;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
@@ -157,14 +175,16 @@ const RoomId = () => {
               onClick={() => alert("Pas encore fonctionnel")}
               className="p-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-200 border border-slate-700/50"
             >
-              <Settings className="w-5 h-5 text-slate-400 hover:text-slate-200" /> { }
+              <Settings className="w-5 h-5 text-slate-400 hover:text-slate-200" />{" "}
+              {}
             </button>
             <button
               type="button"
               onClick={() => alert("Pas encore fonctionnel")}
               className="p-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-200 border border-slate-700/50"
             >
-              <MoreVertical className="w-5 h-5 text-slate-400 hover:text-slate-200" /> { }
+              <MoreVertical className="w-5 h-5 text-slate-400 hover:text-slate-200" />{" "}
+              {}
             </button>
           </div>
         </div>
@@ -282,7 +302,7 @@ const RoomId = () => {
                 {currentRoom.tasks.map((task) => (
                   <div
                     key={task._id}
-                    className="group bg-slate-200 backdrop-blur-sm rounded-2xl p-2 hover:border-slate-600/50 transition-all duration-300 cursor-pointer shadow-md"
+                    className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl group cursor-pointer"
                   >
                     <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
                       <div className="flex-1">
@@ -303,8 +323,19 @@ const RoomId = () => {
                             {getStatusIcon(task.status || "todo")}
                             {(task.status || "todo").replace("-", " ")}
                           </span>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs text-slate-700 font-medium border ${getPriorityColor(
+                              task.priority || "priority"
+                            )} flex items-center gap-1`}
+                          >
+                            {getPriorityIcon(task.priority || "priority")}
+                            {task.priority || "priority"}
+                          </span>
                         </div>
-                        <p className="text-slate-700 leading-relaxed uppercase">
+                        <p
+                          className="text-gray-700 text-sm mb-4 line-clamp-2 break-all"
+                          title={task.description}
+                        >
                           {task.description || "Aucune description"}
                         </p>
                       </div>
@@ -322,7 +353,8 @@ const RoomId = () => {
                           className="p-2 rounded-lg hover:bg-slate-800/50 transition-colors duration-200"
                           onClick={() => alert("Pas encore fonctionnel")}
                         >
-                          <Star className="w-4 h-4 text-slate-500 hover:text-yellow-400" /> { }
+                          <Star className="w-4 h-4 text-slate-500 hover:text-yellow-400" />{" "}
+                          {}
                         </button>
                       </div>
                     </div>

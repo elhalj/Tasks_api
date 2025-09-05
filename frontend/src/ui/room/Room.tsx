@@ -1,20 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../context";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useRoom } from "../../hook/useRoom";
 import Loader from "../../components/Loader";
+import type { ApiError } from "../../types/apiError";
+import { useAuth } from "../../hook";
 
-type ApiError = Error & {
-  response?: {
-    data?: {
-      error?: string;
-      message?: string
-    }
-  }
-}
 const RoomUI = () => {
   const { room, getRoom, deleteRoom, loading: load } = useRoom();
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState("")
 
@@ -108,7 +101,7 @@ const RoomUI = () => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-      {loading && <Loader/>}
+      {loading && <Loader />}
       <RoomRow />
     </div>
   );
