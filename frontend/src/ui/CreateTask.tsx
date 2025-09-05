@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from "react";
-import { TaskContext } from "../context";
+import {  useEffect, useState } from "react";
 import { useRoom } from "../hook/useRoom";
 import toast from "react-hot-toast";
+import type { ApiError } from "../types/apiError";
+import { useTask } from "../hook/useTask";
 
 interface TaskProps {
   title: string;
@@ -18,20 +19,11 @@ interface CreateTaskProps {
   roomId?: string;
 }
 
-type ApiError = Error & {
-  response?: {
-    data?: {
-      error?: string;
-      message?: string;
-    };
-  };
-};
-
 const statusTable = ["pending", "in_progress", "done", "canceled"];
 const priorityTable = ["low", "medium", "high", "critical"];
 
 const CreateTask = ({ roomId }: CreateTaskProps) => {
-  const { addTask } = useContext(TaskContext);
+  const { addTask } = useTask();
   const { getRoom } = useRoom()
   useEffect(() => {
     getRoom()

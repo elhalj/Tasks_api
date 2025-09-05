@@ -24,7 +24,7 @@ type ApiError = Error & {
 };
 
 export const TaskProvider = ({ children }: TaskProviderProps) => {
-  const { user } = useContext(AuthContext);
+  const { user, currentUser } = useContext(AuthContext);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -196,7 +196,7 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
 
         // Ne pas ajouter la tâche si l'auteur est l'utilisateur actuel
         // car elle est déjà ajoutée via la réponse de l'API
-        const currentUserId = user?._id;
+        const currentUserId = currentUser?._id;
         if (data.authorId !== currentUserId) {
           setTasks((prev) => [data.task, ...prev]);
         }

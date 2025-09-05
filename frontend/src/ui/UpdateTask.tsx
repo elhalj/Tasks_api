@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useParams } from "react-router-dom";
-import { TaskContext } from "../context";
+import { useTask } from "../hook";
 
 interface TaskProps {
   _id?: string;
@@ -18,7 +18,7 @@ const statusTable = ["pending", "in_progress", "done", "canceled"];
 const priorityTable = ["low", "medium", "high", "critical"];
 
 const UpdateTask = () => {
-  const { tasks, updateTask } = useContext(TaskContext);
+  const { tasks, updateTask } = useTask();
   const { id } = useParams<{ id: string }>();
   const myTask = tasks.find((t) => t._id === id);
 

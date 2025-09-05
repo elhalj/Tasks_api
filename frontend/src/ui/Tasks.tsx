@@ -1,14 +1,14 @@
-import React, { useContext, useEffect } from "react";
-import { AuthContext, TaskContext } from "../context";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, MoreHorizontal, Plus } from "lucide-react";
 import getPriorityColor from "../utils/getPriorities";
 import { getStatusIcon } from "../utils/getStatusIcon";
 import Loader from "../components/Loader";
+import { useAuth, useTask } from "../hook";
 
 const Tasks = ({ viewMode }: { viewMode: string }) => {
-  const { tasks, getTasks, deleteTask, loading } = useContext(TaskContext);
-  const { currentUser } = useContext(AuthContext);
+  const { tasks, getTasks, deleteTask, loading } = useTask();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     getTasks();

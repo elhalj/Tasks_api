@@ -1,19 +1,12 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../context";
+import { useEffect, useState } from "react";
 import { useRoom } from "../../hook/useRoom";
 import Loader from "../../components/Loader";
 import toast from "react-hot-toast";
+import type { ApiError } from "../../types/apiError";
+import { useAuth } from "../../hook";
 
-type ApiError = Error & {
-  response?: {
-    data?: {
-      error?: string;
-      message?: string
-    }
-  }
-}
 const AddMember = ({ roomId }: { roomId: string }) => {
-  const { user, getAllUser, loading: authLoading } = useContext(AuthContext);
+  const { user, getAllUser, loading: authLoading } = useAuth()
   const { addMember } = useRoom();
   const [errors, setErrors] = useState("");
   const [addingMemberId, setAddingMemberId] = useState<string | null>(null);

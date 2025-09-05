@@ -1,20 +1,12 @@
-import React, { useContext, useState } from "react";
-import { AuthContext } from "../context";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import type { ApiError } from "../types/apiError";
+import { useAuth } from "../hook";
 
 interface LoginForm {
   email: string;
   password: string;
-}
-
-type ApiError = Error & {
-  response?: {
-    data?: {
-      error?: string;
-      message?: string
-    }
-  }
 }
 
 const Login = () => {
@@ -22,7 +14,7 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -65,9 +57,12 @@ const Login = () => {
       toast.success("Connecté avec succès");
       navigate("/dashboard");
     } catch (error) {
-      const apiError = error as ApiError
-      const errorMessage = apiError.response?.data?.message || apiError.response?.data?.error || "Connexion Error"
-      setError(`Erreur ${errorMessage}`)
+      const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.message ||
+        apiError.response?.data?.error ||
+        "Connexion Error";
+      setError(`Erreur ${errorMessage}`);
       toast.error("Erreur de connexion");
     } finally {
       setLoading(false);
