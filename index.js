@@ -9,6 +9,7 @@ import { authenticate } from "./src/middleware/authmiddleware.js";
 import jwt from "jsonwebtoken";
 import { commentRoutes } from "./src/routes/comment.route.js";
 import { roomRoutes } from "./src/routes/room.route.js";
+import notificationRoutes from "./src/routes/notification.route.js";
 
 dotenv.config();
 
@@ -157,6 +158,7 @@ async function startServer() {
     await app.register(authRoute, { prefix: "/api/v1/auth" });
     await app.register(commentRoutes, { prefix: "/api/v1/comment" });
     await app.register(roomRoutes, { prefix: "/api/v1/room" });
+    await app.register(notificationRoutes, { prefix: "/api/v1/notification" });
 
     // Routes pour les notifications en temps réel
     app.post("/api/v1/broadcast", async (request, reply) => {

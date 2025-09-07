@@ -14,6 +14,7 @@ interface NotificationProps {
     taskUpdates?: boolean;
     mention?: boolean
 }
+// Préference
 type LanguageType = "fr" | "en" | "es";
 type ThemeType = "light" | "dark" | "system";
 export interface Preference {
@@ -21,6 +22,7 @@ export interface Preference {
     language?: LanguageType;
     theme: ThemeType;
 }
+// Statistiques
 type StatusType = "active" | "inactive" | "suspended";
 interface StatsProp {
     tasksCreated?: number;

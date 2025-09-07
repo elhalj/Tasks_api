@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
 import instance from "../services/api";
 import type { User } from "../types/user";
+import toast from "react-hot-toast";
 
 
 type ApiError = Error & {
@@ -154,6 +155,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  const updatePreferences = useCallback(async (preference: User["preference"], profileId: string) => { 
+    try {
+      setLoading(true)
+      const response = await instance.put(`/auth/update/preference/${profileId}`, {
+        preference
+      })
+
+      const { res } = response.data
+      setCurrentUser(res)
+    } catch (error) {
+      const apiError = error as ApiError
+      const messageError = apiError.response?.data?.message || apiError.response?.data?.error || "Erreur de modification"
+      setError(`Erreur: ${messageError}`)
+      toast.error(messageError)
+    }finally{
+      setLoading(false)
+    }
+  }, [])
+  
+  const updateProfile = useCallback(async (profile: User["profile"], profileId: string) => {
+    try {
+      setLoading(true)
+      const response = await instance.put(`/auth/profile/${profileId}`, {
+        profile
+      })
+
+      const res = await response.data
+      setCurrentUser(res)
+    } catch (error) {
+      const apiError = error as ApiError
+      const errorMessage = apiError.response?.data?.message || apiError.response?.data?.error || "Erreur de modification"
+      setError(`Error: ${errorMessage}`)
+    } finally {
+      setLoading(false)
+    }
+  },[])
+
   return (
     <AuthContext.Provider
       value={{ 
@@ -163,6 +201,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         register, 
         logout, 
         getAllUser, 
+        updatePreferences,
+        updateProfile,
         loading,
         error
       }}

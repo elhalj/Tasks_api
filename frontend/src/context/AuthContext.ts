@@ -12,6 +12,8 @@ export interface AuthContextType {
     register: (userName: string, email: string, password: string) => Promise<void>;
     logout: () => void;
     getAllUser: () => Promise<void>
+    updatePreferences: (preference: User["preference"], profileId: string) => Promise<void>
+    updateProfile: (profile: User["profile"], profileId: string) => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -21,6 +23,8 @@ export const AuthContext = createContext<AuthContextType>({
     register: async () => {},
     logout: () => { },
     getAllUser: async () => { },
+    updatePreferences: async () => { },
+    updateProfile: async () => {},
     loading: false,
     error:""
 });

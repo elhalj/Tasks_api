@@ -118,7 +118,9 @@ const taskSchema = new mongoose.Schema(
     ],
     // Les commentaires sont maintenant gérés via le modèle Comment
     // avec une référence bidirectionnelle
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
+    comments: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Comment", default: [] },
+    ],
   },
   {
     timestamps: true,
