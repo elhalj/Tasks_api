@@ -1,5 +1,5 @@
 import Room from "../models/room.model.js";
-import mongoose from "mongoose.js";
+import mongoose from "mongoose";
 import Task from "../models/tasks.model.js";
 import { v4 as uuidv4 } from "uuid";
 import { isValidObjectId } from "../helpers/validateId.js";

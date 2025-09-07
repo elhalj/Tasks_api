@@ -1,8 +1,9 @@
-import mongoose from 'mongoose';
-import Comment from "../models/comment.model";
-import Task from "../models/tasks.model";
-import Room from "../models/room.model";
-import User from "../models/user.model";
+import mongoose from "mongoose";
+import Comment from "../models/comment.model.js";
+import Task from "../models/tasks.model.js";
+import Room from "../models/room.model.js";
+import User from "../models/user.model.js";
+import { isValidObjectId } from "../helpers/validateId.js";
 
 export class Comments {
   async getComment(request, reply) {
@@ -12,8 +13,8 @@ export class Comments {
           path: "replies",
           populate: {
             path: "author",
-            select: "userName"
-          }
+            select: "userName",
+          },
         })
         .populate("author", "userName")
         .populate({
@@ -29,13 +30,62 @@ export class Comments {
 
       return reply.send({
         success: true,
-        data: comments
+        data: comments,
       });
     } catch (error) {
       return reply.status(500).send({
         success: false,
         message: "Erreur lors de la récupération des commentaires",
-        error: error.message
+        error: error.message,
+      });
+    }
+  }
+
+  async getCommentTask(request, reply) {
+    const { taskId, roomId, page = 1, limit = 10 } = request.query;
+
+    if (!taskId && !roomId) {
+      return reply.code(400).send({
+        success: false,
+        error: "Un ID de tâche ou de salle est requis",
+      });
+    }
+
+    try {
+      const query = {};
+      if (taskId) query.task = taskId;
+      if (roomId) query.room = roomId;
+
+      const options = {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sort: { createdAt: -1 },
+        populate: [
+          { path: "author", select: "userName email profile.avatar" },
+          { path: "replies.author", select: "userName email profile.avatar" },
+        ],
+      };
+
+      const comments = await Comment.paginate(query, options);
+
+      return {
+        success: true,
+        comments: comments.docs,
+        pagination: {
+          total: comments.totalDocs,
+          pages: comments.totalPages,
+          page: comments.page,
+          limit: comments.limit,
+          hasNext: comments.hasNextPage,
+          hasPrev: comments.hasPrevPage,
+        },
+      };
+    } catch (error) {
+      console.error("Erreur lors de la récupération des commentaires:", error);
+      return reply.code(500).send({
+        success: false,
+        error:
+          "Une erreur est survenue lors de la récupération des commentaires",
       });
     }
   }
@@ -45,7 +95,7 @@ export class Comments {
     session.startTransaction();
 
     try {
-      const { content, task, room } = request.body;
+      const { replies, task, room } = request.body;
       const userId = request.user?.userId;
 
       // Vérifier que l'utilisateur est authentifié
@@ -53,16 +103,16 @@ export class Comments {
         await session.abortTransaction();
         return reply.status(401).send({
           success: false,
-          message: "Authentification requise"
+          message: "Authentification requise",
         });
       }
 
       // Vérifier que le contenu est fourni
-      if (!content || !content.trim()) {
+      if (!replies || !replies.trim()) {
         await session.abortTransaction();
         return reply.status(400).send({
           success: false,
-          message: "Le contenu du commentaire est requis"
+          message: "Le contenu du commentaire est requis",
         });
       }
 
@@ -71,7 +121,7 @@ export class Comments {
         await session.abortTransaction();
         return reply.status(400).send({
           success: false,
-          message: "Un commentaire doit être associé à une tâche ou une salle"
+          message: "Un commentaire doit être associé à une tâche ou une salle",
         });
       }
 
@@ -82,7 +132,7 @@ export class Comments {
           await session.abortTransaction();
           return reply.status(404).send({
             success: false,
-            message: "La tâche spécifiée n'existe pas"
+            message: "La tâche spécifiée n'existe pas",
           });
         }
       }
@@ -94,17 +144,17 @@ export class Comments {
           await session.abortTransaction();
           return reply.status(404).send({
             success: false,
-            message: "La salle spécifiée n'existe pas"
+            message: "La salle spécifiée n'existe pas",
           });
         }
       }
 
       // Créer le commentaire
       const comment = new Comment({
-        content: content.trim(),
+        replies: replies.trim(),
         author: userId,
         ...(task && { task }),
-        ...(room && { room })
+        ...(room && { room }),
       });
 
       const savedComment = await comment.save({ session });
@@ -113,7 +163,7 @@ export class Comments {
       await User.findByIdAndUpdate(
         userId,
         {
-          $addToSet: { comments: savedComment._id },
+          $addToSet: { comment: savedComment._id },
           $inc: { "stats.commentsPosted": 1 },
         },
         { session, new: true }
@@ -142,24 +192,266 @@ export class Comments {
 
       // Peupler les champs nécessaires avant de renvoyer la réponse
       const populatedComment = await Comment.findById(savedComment._id)
-        .populate('author', 'userName')
-        .populate('task', 'title')
-        .populate('room', 'room_name');
+        .populate("author", "userName")
+        .populate("task", "title")
+        .populate("room", "room_name");
 
       return reply.status(201).send({
         success: true,
-        data: populatedComment
+        data: populatedComment,
       });
-
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      console.error('Erreur addComment:', error);
-      
+      console.error("Erreur addComment:", error);
+
       return reply.status(500).send({
         success: false,
         message: "Erreur lors de la création du commentaire",
-        error: error.message
+        error: error.message,
+      });
+    }
+  }
+
+  async updateComment(request, reply) {
+    const { commentId } = request.params;
+    const { content } = request.body;
+    const userId = request.user.userId;
+
+    if (!isValidObjectId(commentId)) {
+      return reply.code(400).send({
+        success: false,
+        error: "ID de commentaire invalide",
+      });
+    }
+
+    if (!content || typeof content !== "string" || content.trim() === "") {
+      return reply.code(400).send({
+        success: false,
+        error: "Le contenu du commentaire est requis",
+      });
+    }
+
+    try {
+      const comment = await Comment.findOneAndUpdate(
+        { _id: commentId, author: userId },
+        {
+          content: content.trim(),
+          isEdited: true,
+          editedAt: new Date(),
+        },
+        { new: true, runValidators: true }
+      );
+
+      if (!comment) {
+        return reply.code(404).send({
+          success: false,
+          error:
+            "Commentaire non trouvé ou vous n'êtes pas autorisé à le modifier",
+        });
+      }
+
+      return {
+        success: true,
+        comment: await comment.populate("author", "userName email"),
+      };
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du commentaire:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Une erreur est survenue lors de la mise à jour du commentaire",
+      });
+    }
+  }
+
+  async deleteComment(request, reply) {
+    const { commentId } = request.params;
+    const userId = request.user.userId;
+
+    if (!isValidObjectId(commentId)) {
+      return reply.code(400).send({
+        success: false,
+        error: "ID de commentaire invalide",
+      });
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // Trouver le commentaire et vérifier les droits
+      const comment = await Comment.findOneAndDelete({
+        _id: commentId,
+        author: userId, // Seul l'auteur peut supprimer son commentaire
+      }).session(session);
+
+      if (!comment) {
+        await session.abortTransaction();
+        session.endSession();
+        return reply.code(404).send({
+          success: false,
+          error:
+            "Commentaire non trouvé ou vous n'êtes pas autorisé à le supprimer",
+        });
+      }
+
+      // Supprimer la référence du commentaire du modèle parent
+      if (comment.task) {
+        await Task.findByIdAndUpdate(
+          comment.task,
+          { $pull: { comments: commentId } },
+          { session }
+        );
+      } else if (comment.room) {
+        await Room.findByIdAndUpdate(
+          comment.room,
+          { $pull: { comments: commentId } },
+          { session }
+        );
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return { success: true, message: "Commentaire supprimé avec succès" };
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      console.error("Erreur lors de la suppression du commentaire:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Une erreur est survenue lors de la suppression du commentaire",
+      });
+    }
+  }
+
+  async replyComment(request, reply) {
+    const { commentId } = request.params;
+    const userId = request.user?.userId;
+
+    // Vérifier que l'utilisateur est authentifié
+    if (!userId) {
+      return reply.status(401).send({
+        success: false,
+        message: "Authentification requise",
+      });
+    }
+
+    try {
+      // Vérifier que le commentaire parent existe
+      const parentComment = await Comment.findById(commentId);
+      if (!parentComment) {
+        return reply.status(404).send({
+          success: false,
+          message: "Commentaire parent introuvable",
+        });
+      }
+
+      const { content } = request.body;
+
+      // Valider le contenu de la réponse
+      if (!content || typeof content !== "string" || !content.trim()) {
+        return reply.status(400).send({
+          success: false,
+          message:
+            "Le contenu de la réponse est requis et doit être une chaîne de caractères valide",
+        });
+      }
+
+      // Créer l'objet de réponse
+      const replyData = {
+        content: content.trim(),
+        author: userId,
+        likes: [],
+      };
+
+      // Ajouter la réponse au tableau replies du commentaire parent
+      parentComment.replies.push(replyData);
+      await parentComment.save();
+
+      // Mettre à jour les statistiques de l'utilisateur
+      await User.findByIdAndUpdate(userId, {
+        $push: { comment: newReply._id },
+      });
+
+      // Mettre à jour les données du commentaire parent
+      await Comment.findByIdAndUpdate(commentId, {
+        $push: { replies: newReply._id },
+      });
+
+      return reply.code(201).send({
+        success: true,
+        message: "Effectué avec success",
+        newReply,
+      });
+    } catch (error) {
+      return reply
+        .code(500)
+        .send({ success: false, message: `Erreur server: ${error.message}` });
+    }
+  }
+
+  async addLike(request, reply) {
+    const { commentId } = request.params;
+    const userId = request.user?.userId;
+
+    try {
+      // Vérifier que l'utilisateur est authentifié
+      if (!userId) {
+        return reply.status(401).send({
+          success: false,
+          message: "Authentification requise",
+        });
+      }
+
+      // Vérifier que le commentaire existe
+      const comment = await Comment.findById(commentId);
+      if (!comment) {
+        return reply.status(404).send({
+          success: false,
+          message: "Commentaire introuvable",
+        });
+      }
+
+      // Vérifier si l'utilisateur a déjà liké le commentaire
+      const hasLiked = comment.likes.includes(userId);
+
+      let updatedComment;
+
+      if (hasLiked) {
+        // Retirer le like
+        updatedComment = await Comment.findByIdAndUpdate(
+          commentId,
+          { $pull: { likes: userId } },
+          { new: true }
+        ).populate("likes", "userName");
+      } else {
+        // Ajouter le like
+        updatedComment = await Comment.findByIdAndUpdate(
+          commentId,
+          { $addToSet: { likes: userId } },
+          { new: true }
+        ).populate("likes", "userName");
+      }
+
+      return reply.send({
+        success: true,
+        data: {
+          commentId: updatedComment._id,
+          likes: updatedComment.likes,
+          likeCount: updatedComment.likes.length,
+          hasLiked: !hasLiked, // Inverser car on a déjà mis à jour
+        },
+        message: hasLiked
+          ? "Like retiré avec succès"
+          : "Commentaire liké avec succès",
+      });
+    } catch (error) {
+      console.error("Erreur dans addLike:", error);
+      return reply.status(500).send({
+        success: false,
+        message: "Erreur lors de la mise à jour du like",
+        error: error.message,
       });
     }
   }

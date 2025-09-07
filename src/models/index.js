@@ -1,6 +1,5 @@
 import "./notify.model.js";
 import "./user.model.js";
-import "./notification.model.js";
 // Import other models here as needed
 
 export * from "./notify.model.js";

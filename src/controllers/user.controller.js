@@ -1,5 +1,5 @@
 import User from "../models/user.model.js";
-import generateToken from "../utils/token.js";
+import { generateToken } from "../utils/token.js";
 
 export class UserController {
   async getUser(request, reply) {
@@ -138,7 +138,7 @@ export class UserController {
     const { profileId } = request.params;
     const userId = request.user.userId;
 
-    const { preference } = request.body;
+    const { preferences } = request.body;
 
     try {
       if (!userId) {
@@ -148,7 +148,7 @@ export class UserController {
         });
       }
 
-      if (typeof preference !== "objeect") {
+      if (typeof preferences !== "objeect") {
         return reply
           .code(401)
           .send({ success: false, message: "Erreur au niveau de l'objet" });

@@ -1,8 +1,8 @@
 import User from "../models/user.model.js";
 import Task from "../models/tasks.model.js";
-import Comment from "../models/comment.model";
-import { handleError } from "../helpers/handleError";
-import { ERROR_MESSAGES } from "../constants/roomErrorMessage";
+import Comment from "../models/comment.model.js";
+import { handleError } from "../helpers/handleError.js";
+import { ERROR_MESSAGES } from "../constants/roomErrorMessage.js";
 import Room from "../models/room.model.js";
 
 export class RoomController {
@@ -616,6 +616,58 @@ export class RoomController {
         room: populatedRoom,
       };
     } catch (error) {
+      return handleError(error, reply);
+    }
+  }
+
+  async deleteRoom(request, reply) {
+    const { roomId } = request.params;
+    const currentUserId = request.user.userId;
+    const session = await mongoose.startSession();
+    
+    try {
+      session.startTransaction();
+      
+      // Vérifier que la salle existe
+      const room = await Room.findById(roomId).session(session);
+      if (!room) {
+        await session.abortTransaction();
+        session.endSession();
+        return reply.code(404).send({
+          success: false,
+          error: ERROR_MESSAGES.ROOM_NOT_FOUND,
+        });
+      }
+
+      // Vérifier que l'utilisateur est admin de la salle
+      if (room.admin.toString() !== currentUserId) {
+        await session.abortTransaction();
+        session.endSession();
+        return reply.code(403).send({
+          success: false,
+          error: ERROR_MESSAGES.NOT_ADMIN,
+        });
+      }
+
+      // Supprimer toutes les tâches associées à la salle
+      await Task.deleteMany({ room: roomId }).session(session);
+
+      // Supprimer tous les commentaires associés à la salle
+      await Comment.deleteMany({ room: roomId }).session(session);
+
+      // Supprimer la salle
+      await Room.findByIdAndDelete(roomId).session(session);
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return {
+        success: true,
+        message: "Salle et toutes ses données associées supprimées avec succès",
+      };
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       return handleError(error, reply);
     }
   }

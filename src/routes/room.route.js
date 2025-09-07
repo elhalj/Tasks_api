@@ -1,11 +1,3 @@
-import mongoose from "mongoose";
-import { isValidObjectId } from "../helpers/validateId.js";
-import Room from "../models/room.model.js";
-import User from "../models/user.model.js";
-import Task from "../models/tasks.model.js";
-import Comment from "../models/comment.model.js";
-import { handleError } from "../helpers/handleError.js";
-import { ERROR_MESSAGES } from "../constants/roomErrorMessage.js";
 import { RoomController } from "../controllers/room.controller.js";
 
 const roomController = new RoomController();
@@ -59,7 +51,7 @@ export const roomRoutes = async (fastify, options) => {
     {
       preHandler: fastify.authenticate,
     },
-    RoomController.deleteRoom
+    roomController.deleteRoom
   );
 
   // Transfer room ownership to another member
