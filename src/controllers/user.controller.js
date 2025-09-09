@@ -10,6 +10,19 @@ export class UserController {
     return users;
   }
 
+  async getUserById(request, reply) {
+    const { id } = request.params;
+    const user = await User.findById(id).populate("userName email stats");
+    if (!user) {
+      return reply.code(404).send({
+        success: false,
+        message: "Error, user not fund",
+        error: "User not found",
+      });
+    }
+    return user;
+  }
+
   async register(request, reply) {
     const { userName, email, password } = request.body;
     const isExist = await User.findOne({ email });
@@ -129,38 +142,53 @@ export class UserController {
   async updatePreference(request, reply) {
     const { profileId } = request.params;
     const userId = request.user.userId;
-
-    const { preferences } = request.body;
+    const { email, push, taskUpdates, mention, language, theme } = request.body;
 
     try {
       if (!userId) {
         return reply.code(401).send({
           success: false,
-          message: "Pas autoriser à effectuer cette requete",
+          message: "Non autorisé à effectuer cette requête",
         });
       }
 
-      if (typeof preferences !== "objeect") {
-        return reply
-          .code(401)
-          .send({ success: false, message: "Erreur au niveau de l'objet" });
+      const updateData = {
+        preferences: {
+          notifications: {
+            email,
+            push,
+            taskUpdates,
+            mentions: mention, // Note: In the model it's 'mentions' but in the request it's 'mention'
+          },
+          language,
+          theme,
+        },
+      };
+
+      const updatedUser = await User.findByIdAndUpdate(
+        profileId,
+        { $set: updateData },
+        { new: true, runValidators: true }
+      ).select("-password");
+
+      if (!updatedUser) {
+        return reply.code(404).send({
+          success: false,
+          message: "Utilisateur non trouvé",
+        });
       }
 
-      const updatePrefer = await User.findByIdAndUpdate(
-        profileId,
-        { $set: { preferences } },
-        { $new: true }
-      );
-
-      return reply.code(201).send({
-        success: false,
-        message: "Modifié avec succes",
-        updatePrefer,
+      return reply.code(200).send({
+        success: true,
+        message: "Préférences mises à jour avec succès",
+        user: updatedUser,
       });
     } catch (error) {
+      console.error("Error updating preferences:", error);
       return reply.code(500).send({
         success: false,
-        message: "Erreur survenu lors de la modification",
+        message: "Erreur lors de la mise à jour des préférences",
+        error: error.message,
       });
     }
   }

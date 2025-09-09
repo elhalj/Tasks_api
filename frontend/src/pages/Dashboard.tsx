@@ -1,13 +1,15 @@
-import Header from '../components/Header'
-import Main from '../components/Main'
+
+import Header from '../components/Header';
+import Main from '../components/Main';
 
 const Dashboard = () => {
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <Header/>
       <Main/>
+        
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

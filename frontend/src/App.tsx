@@ -23,7 +23,7 @@ const App = () => {
         <Route path="/dashboard/tasks/:id/edit" element={<UpdatePage />} />
         <Route path="/dashboard/add/room" element={<AddRoomPage />} />
         <Route path="/dashboard/room/:id" element={<RoomId />} />
-        <Route path="/dashboard/profile" element={<ProfilePage/>}/>
+        <Route path="/dashboard/profile/:id" element={<ProfilePage/>}/>
       </Routes>
       <Toaster position="top-right" reverseOrder={false} />
     </>

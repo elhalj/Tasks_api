@@ -3,6 +3,7 @@ import type { Room } from "./room";
 import type { Task } from "./task";
 
 export interface Profile {
+    userName: string,
     firstName: string;
     lastName: string;
     bio: string;
