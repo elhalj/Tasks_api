@@ -4,6 +4,7 @@ import Comment from "../models/comment.model.js";
 import { handleError } from "../helpers/handleError.js";
 import { ERROR_MESSAGES } from "../constants/roomErrorMessage.js";
 import Room from "../models/room.model.js";
+import mongoose from "mongoose";
 
 export class RoomController {
   async getRoom(request, reply) {
@@ -624,10 +625,10 @@ export class RoomController {
     const { roomId } = request.params;
     const currentUserId = request.user.userId;
     const session = await mongoose.startSession();
-    
+
     try {
       session.startTransaction();
-      
+
       // Vérifier que la salle existe
       const room = await Room.findById(roomId).session(session);
       if (!room) {

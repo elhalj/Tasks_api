@@ -35,9 +35,14 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
 
       const { adminRooms = [], memberRooms = [] } = res.data;
       setRoom([...adminRooms, ...memberRooms]);
-    } catch (error: any) {
-      // Error handling
-      setErrors(error)
+    } catch (error) {
+     const apiError = error as ApiError;
+      const errorMessage =
+        apiError.response?.data?.error ||
+        apiError.response?.data?.message ||
+        apiError.message ||
+        "Erreur lors de la recuperation des membres";
+      setErrors(`Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -97,11 +102,7 @@ export const RoomProvider = ({ children }: RoomProviderProps) => {
       }
 
       if (response.data.room) {
-        setRoom((prevRooms) =>
-          prevRooms.map((room) =>
-            room._id === roomId ? response.data.room : room
-          )
-        );
+        
         setErrors(null);
         return response.data;
       }
