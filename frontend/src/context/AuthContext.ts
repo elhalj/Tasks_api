@@ -12,8 +12,8 @@ export interface AuthContextType {
     register: (userName: string, email: string, password: string) => Promise<void>;
     logout: () => void;
     getAllUser: () => Promise<void>
-    updatePreferences: (preference: User["preference"], profileId: string) => Promise<void>
-    updateProfile: (profile: User["profile"], profileId: string) => Promise<void>
+    updatePreferences: (email: boolean, push: boolean, taskUpdates: boolean, mention: boolean, language: string, theme: string, profileId: string) => Promise<void>
+    updateProfile: (firstName: string, lastName: string, bio: string, phone: string, profileId: string) => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextType>({

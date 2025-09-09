@@ -155,42 +155,85 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const updatePreferences = useCallback(async (preference: User["preference"], profileId: string) => { 
+  const updatePreferences = useCallback(async (email: boolean, push: boolean, taskUpdates: boolean, mention: boolean, language: string, theme: string, profileId: string) => { 
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await instance.put(`/auth/update/preference/${profileId}`, {
-        preference
-      })
+        email,
+        push,
+        taskUpdates,
+        mention,
+        language,
+        theme
+      });
 
-      const { res } = response.data
-      setCurrentUser(res)
+      const updatedUser = response.data?.res || response.data;
+      
+      // Update current user state
+      setCurrentUser(prev => ({
+        ...prev,
+        preferences: updatedUser.preferences
+      }));
+      
+      // Update local storage
+      const currentUserData = JSON.parse(localStorage.getItem('user') || '{}');
+      localStorage.setItem('user', JSON.stringify({
+        ...currentUserData,
+        preferences: updatedUser.preferences
+      }));
+      
+      toast.success('Préférences mises à jour avec succès');
+      return updatedUser;
     } catch (error) {
-      const apiError = error as ApiError
-      const messageError = apiError.response?.data?.message || apiError.response?.data?.error || "Erreur de modification"
-      setError(`Erreur: ${messageError}`)
-      toast.error(messageError)
-    }finally{
-      setLoading(false)
+      const apiError = error as ApiError;
+      const messageError = apiError.response?.data?.message || 
+                         apiError.response?.data?.error || 
+                         "Erreur lors de la modification des préférences";
+      setError(`Erreur: ${messageError}`);
+      toast.error(messageError);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   }, [])
   
-  const updateProfile = useCallback(async (profile: User["profile"], profileId: string) => {
+  const updateProfile = useCallback(async (firstName: string, lastName: string, bio: string, phone: string, profileId: string) => {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await instance.put(`/auth/profile/${profileId}`, {
-        profile
-      })
+        firstName,
+        lastName,
+        bio,
+        phone
+      });
 
-      const res = await response.data
-      setCurrentUser(res)
+      const updatedUser = response.data;
+      setCurrentUser(prev => ({
+        ...prev,
+        ...updatedUser
+      }));
+      
+      // Update local storage
+      const currentUserData = JSON.parse(localStorage.getItem('user') || '{}');
+      localStorage.setItem('user', JSON.stringify({
+        ...currentUserData,
+        ...updatedUser
+      }));
+      
+      toast.success('Profil mis à jour avec succès');
+      return updatedUser;
     } catch (error) {
-      const apiError = error as ApiError
-      const errorMessage = apiError.response?.data?.message || apiError.response?.data?.error || "Erreur de modification"
-      setError(`Error: ${errorMessage}`)
+      const apiError = error as ApiError;
+      const errorMessage = apiError.response?.data?.message || 
+                         apiError.response?.data?.error || 
+                         "Erreur lors de la mise à jour du profil";
+      setError(`Erreur: ${errorMessage}`);
+      toast.error(errorMessage);
+      throw error;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  },[])
+  }, [])
 
   return (
     <AuthContext.Provider
