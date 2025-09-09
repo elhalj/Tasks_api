@@ -4,6 +4,8 @@ const userController = new UserController();
 export const authRoute = async (fastify) => {
   //get ALL user (Admin)
   fastify.get("/user", userController.getUser);
+
+  fastify.get("/user/:profileId", userController.getUserById);
   //register user
   fastify.post("/register/user", userController.register);
 

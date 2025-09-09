@@ -197,43 +197,68 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [])
   
-  const updateProfile = useCallback(async (firstName: string, lastName: string, bio: string, phone: string, profileId: string) => {
-    try {
-      setLoading(true);
-      const response = await instance.put(`/auth/profile/${profileId}`, {
+ const updateProfile = useCallback(async (userName: string, firstName: string, lastName: string, bio: string, phone: string, profileId: string) => {
+  try {
+    setLoading(true);
+    const response = await instance.put(`/auth/update/profile/${profileId}`, {
+      userName: userName || currentUser?.userName, // Utiliser le userName fourni ou celui existant
+      profile: {  // Envoyer les données dans un objet "profile"
         firstName,
         lastName,
         bio,
         phone
-      });
+      }
+    });
 
-      const updatedUser = response.data;
-      setCurrentUser(prev => ({
-        ...prev,
-        ...updatedUser
-      }));
-      
-      // Update local storage
-      const currentUserData = JSON.parse(localStorage.getItem('user') || '{}');
-      localStorage.setItem('user', JSON.stringify({
-        ...currentUserData,
-        ...updatedUser
-      }));
-      
-      toast.success('Profil mis à jour avec succès');
-      return updatedUser;
-    } catch (error) {
-      const apiError = error as ApiError;
-      const errorMessage = apiError.response?.data?.message || 
-                         apiError.response?.data?.error || 
-                         "Erreur lors de la mise à jour du profil";
-      setError(`Erreur: ${errorMessage}`);
-      toast.error(errorMessage);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, [])
+    const updatedUser = response.data?.updateProfile || response.data;
+    setCurrentUser(prev => ({
+      ...prev,
+      ...updatedUser
+    }));
+    
+    // Update local storage
+    const currentUserData = JSON.parse(localStorage.getItem('user') || '{}');
+    localStorage.setItem('user', JSON.stringify({
+      ...currentUserData,
+      ...updatedUser
+    }));
+    
+    toast.success('Profil mis à jour avec succès');
+    return updatedUser;
+  } catch (error) {
+    const apiError = error as ApiError;
+    const errorMessage = apiError.response?.data?.message || 
+                       apiError.response?.data?.error || 
+                       "Erreur lors de la mise à jour du profil";
+    setError(`Erreur: ${errorMessage}`);
+    toast.error(errorMessage);
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+}, [currentUser?.userName])
+  const getUserById = useCallback(async (id: string) => {
+  try {
+    setLoading(true);
+    const res = await instance.get(`/auth/user/${id}`);
+    
+    console.log("API Response for user by ID:", res.data); // Debug
+    
+    return res.data;
+  } catch (error) {
+    const apiError = error as ApiError;
+    const errorMessage =
+      apiError.response?.data?.error ||
+      apiError.response?.data?.message ||
+      apiError.message ||
+      "Failed to get User by ID";
+    setError(`Error: ${errorMessage}`);
+    console.error("Erreur getUserById:", error);
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   return (
     <AuthContext.Provider
@@ -243,7 +268,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login, 
         register, 
         logout, 
-        getAllUser, 
+        getAllUser,
+      getUserById,
         updatePreferences,
         updateProfile,
         loading,

@@ -1,7 +1,7 @@
 import { Bell, CheckCircle2, Menu, Search, User, X } from "lucide-react";
 import { useContext, useState } from "react";
 import { AuthContext } from "../context";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 const Header = () => {
   const { currentUser, logout } = useContext(AuthContext);
@@ -123,7 +123,7 @@ const Header = () => {
               <div className="w-24 h-12 bg-slate-700/50 rounded-full flex flex-col items-center justify-center shadow-md">
                 <User className="w-5 h-5 text-white" />
                 <span className="text-white font-bold text-sm">
-                  {currentUser?.userName}
+                  <Link to={`/dashboard/profile/${currentUser?._id || ''}`}>{currentUser?.userName || 'User'}</Link>
                 </span>
               </div>
 
