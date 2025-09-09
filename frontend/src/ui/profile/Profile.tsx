@@ -7,7 +7,7 @@ interface ProfileProps {
   currentUser: User | null | undefined
 }
 
-const Profile = ({ currentUser }: ProfileProps) => {
+const Profiles = ({ currentUser }: ProfileProps) => {
     const { updatePreferences, updateProfile } = useAuth()
     
     // useState pour gérer l'affichage des onglets de profil et de préférence
@@ -271,4 +271,4 @@ const [loading, setLoading] = useState(false);
   )
 }
 
-export default Profile
+export default Profiles

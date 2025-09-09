@@ -5,14 +5,6 @@ export class UserController {
   async getUser(request, reply) {
     const users = await User.find({})
       .populate("userName email stats")
-      .populate({
-        path: "notification",
-        select: "message type",
-        populate: {
-          path: "user",
-          select: "userName email",
-        },
-      })
       .sort({ updatedAt: -1 });
 
     return users;
