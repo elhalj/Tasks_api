@@ -19,7 +19,7 @@ interface NotificationProps {
 type LanguageType = "fr" | "en" | "es";
 type ThemeType = "light" | "dark" | "system";
 export interface Preference {
-    notification?: NotificationProps;
+    notifications?: NotificationProps;
     language?: LanguageType;
     theme: ThemeType;
 }
