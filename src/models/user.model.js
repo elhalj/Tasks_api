@@ -126,8 +126,7 @@ const userSchema = new mongoose.Schema(
       ],
     },
     comment: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Comment",
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
       default: [],
     },
   },
