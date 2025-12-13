@@ -2,7 +2,8 @@ import { CheckCircle, Menu, X } from "lucide-react"
 // import { useContext } from "react"
 // import { Link } from "react-router-dom"
 // import { AuthContext } from "../../context"
-import { FaGithub } from "react-icons/fa"
+import { FaGithub, FaUser } from "react-icons/fa"
+import { Link } from "react-router-dom"
 
 
 const Header = ({ isMenuOpen, setIsMenuOpen, scrollY }: { isMenuOpen: boolean, setIsMenuOpen: (isOpen: boolean) => void, scrollY: number }) => {
@@ -10,7 +11,7 @@ const Header = ({ isMenuOpen, setIsMenuOpen, scrollY }: { isMenuOpen: boolean, s
   return (
     <div>
        {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-gray-900/80 backdrop-blur-lg border-b border-gray-700" style={{ boxShadow: scrollY > 0 ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'none' }}>
+      <nav className="fixed top-0 w-full z-50 bg-gray-900/80 backdrop-blur-lg border-b border-gray-700 text-white" style={{ boxShadow: scrollY > 0 ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'none' }}>
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
@@ -20,12 +21,19 @@ const Header = ({ isMenuOpen, setIsMenuOpen, scrollY }: { isMenuOpen: boolean, s
             
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-8">
-              <a href="#features" className="hover:text-blue-400 transition-colors">Fonctionnalités</a>
-              <a href="#tech" className="hover:text-blue-400 transition-colors">Technologies</a>
-              <a href="#roadmap" className="hover:text-blue-400 transition-colors">Roadmap</a>
+              <a href="#features" className="hover:text-blue-400 transition-colors text-white">Fonctionnalités</a>
+              <a href="#tech" className="hover:text-blue-400 transition-colors text-white">Technologies</a>
+              <a href="#roadmap" className="hover:text-blue-400 transition-colors text-white">Roadmap</a>
             </div>
             
             <div className="flex items-center space-x-4">
+              <Link 
+                to="/login" 
+                className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full transition-all flex items-center space-x-2 hover:shadow-lg hover:shadow-blue-500/25"
+              >
+                <FaUser className="w-4 h-4" />
+                <span>Connexion</span>
+              </Link>
               <a 
                 href="https://github.com/elhalj/Tasks_api" 
                 target="_blank"
@@ -49,9 +57,9 @@ const Header = ({ isMenuOpen, setIsMenuOpen, scrollY }: { isMenuOpen: boolean, s
           {/* Mobile Menu */}
           {isMenuOpen && (
             <div className="md:hidden mt-4 pb-4 space-y-4">
-              <a href="#features" className="block hover:text-blue-400 transition-colors">Fonctionnalités</a>
-              <a href="#tech" className="block hover:text-blue-400 transition-colors">Technologies</a>
-              <a href="#roadmap" className="block hover:text-blue-400 transition-colors">Roadmap</a>
+              <a href="#features" className="block hover:text-blue-400 transition-colors text-white">Fonctionnalités</a>
+              <a href="#tech" className="block hover:text-blue-400 transition-colors text-white">Technologies</a>
+              <a href="#roadmap" className="block hover:text-blue-400 transition-colors text-white">Roadmap</a>
             </div>
           )}
         </div>

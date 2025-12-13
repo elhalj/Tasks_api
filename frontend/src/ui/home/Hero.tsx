@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { roadmapItems } from "../../seeds/roadmapItems";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -53,8 +54,8 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2">
                 <Rocket className="w-5 h-5" />
-                <span>Commencer maintenant</span>
-                <ArrowRight className="w-4 h-4" />
+                <Link to="/login" className="flex justify-around items-center gap-1"><span>Commencer maintenant</span><ArrowRight className="w-4 h-4" /></Link>
+                
               </button>
 
               <a
