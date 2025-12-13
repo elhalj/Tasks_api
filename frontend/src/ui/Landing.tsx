@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./home/Header";
 import Hero from "./home/Hero";
 import Stats from "./home/Stats";
@@ -10,11 +10,18 @@ import Feature from "./home/Feature";
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+      <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} scrollY={scrollY} />
 
       {/* Hero Section */}
       <Hero />
