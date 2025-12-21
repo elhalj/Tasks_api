@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <CheckCircle className="w-6 h-6 text-blue-400" />
-              <span className="text-lg font-semibold">Tasks API</span>
+              <span className="text-white text-lg font-semibold">Tasks API</span>
             </div>
             
             <div className="flex items-center space-x-6">

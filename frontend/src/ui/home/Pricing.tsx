@@ -127,14 +127,14 @@ const Pricing = () => {
       {/* Tech Stack & API Section */}
       <section id="tech" className="py-20 bg-gray-900">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+          <h2 className="text-white text-4xl md:text-5xl font-bold text-center mb-16">
             Stack <span className="text-purple-400">Technologique</span>
           </h2>
 
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             {/* Tech Stack */}
             <div className="mb-16">
-              <h3 className="text-2xl font-bold text-center mb-8">
+              <h3 className="text-white text-2xl font-bold text-center mb-8">
                 Technologies Utilisées
               </h3>
               <div className="flex flex-wrap justify-center gap-4">
@@ -151,8 +151,8 @@ const Pricing = () => {
             </div>
 
             {/* API Endpoints */}
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
-              <h3 className="text-2xl font-bold mb-8 text-center">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700 max-w-full overflow-x-scroll">
+              <h3 className="text-white text-2xl font-bold mb-8 text-center">
                 Endpoints API Principaux
               </h3>
               <div className="grid md:grid-cols-2 gap-8">

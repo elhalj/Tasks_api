@@ -1,5 +1,5 @@
 
-import { Code, Database } from 'lucide-react'
+// import { Code, Database } from 'lucide-react'
 import { features } from '../../seeds/features'
 
 const Feature = () => {
@@ -31,16 +31,16 @@ const Feature = () => {
       </section>
       
       {/* Installation Section */}
-      <section className="py-20 bg-gray-800">
+      {/* <section className="py-20 bg-gray-800">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
             Démarrage <span className="text-blue-400">Rapide</span>
           </h2>
 
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-700">
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
+          <div className="max-w-3xl mx-auto">
+            <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-700 lg:col-span-1">
+                <div className="space-y-4">
                   <h3 className="text-xl font-semibold mb-4 text-green-400 flex items-center">
                     <Code className="w-5 h-5 mr-2" />
                     Installation
@@ -54,8 +54,9 @@ const Feature = () => {
                     </div>
                   </div>
                 </div>
-
-                <div>
+              </div>
+              <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-700 lg:col-span-1">
+                <div className="space-y-4">
                   <h3 className="text-xl font-semibold mb-4 text-blue-400 flex items-center">
                     <Database className="w-5 h-5 mr-2" />
                     Configuration
@@ -72,7 +73,7 @@ const Feature = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </>
   )
 }

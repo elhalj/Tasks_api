@@ -29,7 +29,7 @@ const Header = ({ isMenuOpen, setIsMenuOpen, scrollY }: { isMenuOpen: boolean, s
             <div className="flex items-center space-x-4">
               <Link 
                 to="/login" 
-                className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full transition-all flex items-center space-x-2 hover:shadow-lg hover:shadow-blue-500/25"
+                className=" bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full transition-all flex items-center space-x-2 hover:shadow-lg hover:shadow-blue-500/25"
               >
                 <FaUser className="w-4 h-4" />
                 <span>Connexion</span>
@@ -38,7 +38,7 @@ const Header = ({ isMenuOpen, setIsMenuOpen, scrollY }: { isMenuOpen: boolean, s
                 href="https://github.com/elhalj/Tasks_api" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full transition-all flex items-center space-x-2 hover:shadow-lg hover:shadow-blue-500/25"
+                className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full transition-all hidden md:flex items-center space-x-2 hover:shadow-lg hover:shadow-blue-500/25"
               >
                 <FaGithub className="w-4 h-4" />
                 <span>GitHub</span>

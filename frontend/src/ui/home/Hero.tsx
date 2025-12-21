@@ -32,7 +32,7 @@ const Hero = () => {
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="mb-6 animate-fade-in">
-              <span className="bg-blue-600/20 text-blue-400 px-4 py-2 rounded-full text-sm font-medium border border-blue-600/30">
+              <span className="bg-blue-600/20 text-blue-600 px-4 py-2 rounded-full text-sm font-medium border border-blue-600/30">
                 🚀 Nouveau : MVP Finalisé avec PR #25
               </span>
             </div>
@@ -75,7 +75,7 @@ const Hero = () => {
       {/* Latest Updates */}
       <section className="py-20 bg-gray-800">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+          <h2 className="text-white text-4xl md:text-5xl font-bold text-center mb-16">
             Dernières <span className="text-green-400">Améliorations</span>
           </h2>
 
@@ -83,7 +83,7 @@ const Hero = () => {
             <div className="bg-gradient-to-r from-gray-700 to-gray-800 rounded-2xl p-8 shadow-2xl border border-gray-600">
               <div className="flex items-center mb-6">
                 <GitBranch className="w-8 h-8 text-green-400 mr-4" />
-                <h3 className="text-2xl font-bold">PR #25 - MVP Finalisé</h3>
+                <h3 className="text-white text-2xl font-bold">PR #25 - MVP Finalisé</h3>
                 <span className="ml-auto bg-green-600 text-white px-3 py-1 rounded-full text-sm">
                   Merged
                 </span>
@@ -140,7 +140,7 @@ const Hero = () => {
       {/* Roadmap Section */}
       <section id="roadmap" className="py-20 bg-gray-900">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
+          <h2 className="text-white text-4xl md:text-5xl font-bold text-center mb-16">
             Roadmap <span className="text-yellow-400">2025</span>
           </h2>
 
@@ -153,7 +153,7 @@ const Hero = () => {
                   >
                     {item.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-4 group-hover:text-blue-400 transition-colors">
+                  <h3 className="text-white text-xl font-semibold mb-4 group-hover:text-blue-400 transition-colors">
                     {item.title}
                   </h3>
                   <p className="text-gray-400 leading-relaxed">
